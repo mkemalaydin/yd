@@ -79,7 +79,7 @@
         .suggestion-box.active .btn-apply-sugg { opacity: 1; pointer-events: auto; }
         .suggestion-box.active .btn-apply-sugg:hover { background: #0369a1; transform: translateY(-1px); }
 
-        /* Main Score Buttons */
+        /* Main Score Buttons (Removed 0 option) */
         .score-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .btn-score { flex: 1; height: 45px; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; font-weight: 800; cursor: pointer; transition: all 0.2s; font-size: 1.1rem; color: #475569; }
         .btn-score:hover { border-color: var(--accent); color: var(--accent); background: #f0f9ff; }
@@ -648,7 +648,7 @@ function handleMultipleImageUpload(input, cleanId) {
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 800;
+                const MAX_WIDTH = 500;
                 let width = img.width;
                 let height = img.height;
 
@@ -657,7 +657,7 @@ function handleMultipleImageUpload(input, cleanId) {
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                 
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
                 currentNewImages[cleanId].push(dataUrl);
                 renderPreviews(cleanId);
             }
@@ -855,7 +855,8 @@ function saveData() {
             payload.details[item.id] = {
                 score: valEl ? (parseInt(valEl.value) || 0) : 0,
                 comment: commEl ? commEl.value : "",
-                checks: [] 
+                checks: [],
+                imageUrls: currentNewImages[cleanId] || [] 
             };
             
             // Likert yanıtlarını veritabanı için topla
@@ -878,7 +879,7 @@ function saveData() {
             alert(res.message);
             loadProjectList(); 
         } else {
-            alert("Veritabanı Hatası: " + res.message);
+            alert("Veritabanı Hatası (Görseller çok büyük olabilir): " + res.message);
         }
     })
     .catch(err => {
@@ -957,6 +958,9 @@ function loadProjectData(projNo) {
             document.querySelectorAll('.suggestion-box').forEach(b => { b.classList.remove('active'); b.dataset.suggested = "0"; });
             document.querySelectorAll('.sugg-value').forEach(v => v.innerText = "-");
 
+            currentNewImages = {};
+            document.querySelectorAll('.preview-container').forEach(c => c.innerHTML = '');
+
             if(data.details) {
                 Object.keys(data.details).forEach(id => {
                     let cleanId = id.replace(/\./g, '-');
@@ -977,6 +981,11 @@ function loadProjectData(projNo) {
 
                     if (det.score > 0) {
                         selectScore(cleanId, det.score);
+                    }
+
+                    if (det.imageUrls && det.imageUrls.length > 0) {
+                        currentNewImages[cleanId] = det.imageUrls;
+                        renderPreviews(cleanId);
                     }
                 });
             }
