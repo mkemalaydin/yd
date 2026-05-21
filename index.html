@@ -181,12 +181,9 @@
 </div>
 
 <script>
-// ==========================================
-// KENDİ WEB APP URL'Nİ BURAYA YAPIŞTIR
-// ==========================================
 const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycby_owky_HuQ2CLMijlOVbh75VUJLbHvlDo8ry1CFDGAGk34qP1izBKPVT1y-y5w5HB3hQ/exec"; 
 
-let currentNewImages = {}; // Geçici çoklu resim deposu (Oturum için)
+let currentNewImages = {}; 
 
 const rubricData = [
     {
@@ -195,106 +192,106 @@ const rubricData = [
             {
                 id: "B.1.1", name: "Programların tasarımı ve onayı", max: 5,
                 levels: [
-                    "Kurumda programların tasarımı ve onayına ilişkin süreçler tanımlanmamıştır.",
-                    "Kurumda programların tasarımı ve onayına ilişkin ilke, yöntem, TYYÇ ile uyum ve paydaş katılımını içeren tanımlı süreçler bulunmaktadır.",
-                    "Kurumun genelinde, programlar, tanımlı süreçler doğrultusunda; programların amaç ve öğrenme çıktılarına uygun olarak yürütülmektedir.",
-                    "Programların tasarım ve onay süreçleri sistematik olarak izlenmekte ve ilgili paydaşlarla birlikte değerlendirilerek iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda programların tasarımı ve onayına ilişkin süreçler tanımlanmamıştır. [cite: 2]",
+                    "Kurumda programların tasarımı ve onayına ilişkin ilke, yöntem, TYYÇ ile uyum ve paydaş katılımını içeren tanımlı süreçler bulunmaktadır. [cite: 2]",
+                    "Kurumun genelinde, programlar, tanımlı süreçler doğrultusunda; programların amaç ve öğrenme çıktılarına uygun olarak yürütülmektedir. [cite: 2]",
+                    "Programların tasarım ve onay süreçleri sistematik olarak izlenmekte ve ilgili paydaşlarla birlikte değerlendirilerek iyileştirilmektedir. [cite: 2]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 2]"
                 ],
                 checks: [
-                    "Öğrenme çıktıları TYYÇ ile uyumlu olarak belirlenmiş mi?",
-                    "Kurum misyon/vizyonu gözetilmiş mi?",
-                    "Ders bilgi paketleri/ulusal çekirdek program dikkate alınmış mı?",
-                    "Program tasarımı ve onayı için tanımlı süreçler (Eğitim politikasıyla uyumu, el kitabı vb.) var mı?",
-                    "Süreçlerin yönetsel ve organizasyonel yapısı (Komisyonlar vb.) tanımlı mı?",
-                    "Uzaktan-karma program tasarımında uygulama çeşitliliğine ilişkin kanıtlar var mı?",
-                    "Tüm bu süreçlere aktif paydaş katılımı sağlanmış mı?"
+                    "Öğrenme çıktıları TYYÇ ile uyumlu olarak belirlenmiş mi? [cite: 2]",
+                    "Kurum misyon/vizyonu gözetilmiş mi? [cite: 2]",
+                    "Ders bilgi paketleri/ulusal çekirdek program dikkate alınmış mı? [cite: 2]",
+                    "Program tasarımı ve onayı için tanımlı süreçler (Eğitim politikasıyla uyumu, el kitabı vb.) var mı? [cite: 2]",
+                    "Süreçlerin yönetsel ve organizasyonel yapısı (Komisyonlar vb.) tanımlı mı? [cite: 2]",
+                    "Uzaktan-karma program tasarımında uygulama çeşitliliğine ilişkin kanıtlar var mı? [cite: 2]",
+                    "Tüm bu süreçlere aktif paydaş katılımı sağlanmış mı? [cite: 2]"
                 ]
             },
             {
                 id: "B.1.2", name: "Programın ders dağılım dengesi", max: 5,
                 levels: [
-                    "Ders dağılımı dengesine ilişkin tanımlı süreçler tanımlanmamıştır.",
-                    "Ders dağılımına ilişkin; uzmanlık alanı, zorunlu-seçmeli, genel kültür boyutlarına yönelik ilke ve yöntemleri içeren tanımlı süreçler bulunmaktadır.",
-                    "Ders dağılımı dengesine ilişkin tanımlı süreçlere uygun olarak kurum genelinde uygulamalar bulunmaktadır.",
-                    "Programlarda ders dağılım dengesi izlenmekte ve iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Ders dağılımı dengesine ilişkin tanımlı süreçler tanımlanmamıştır. [cite: 5]",
+                    "Ders dağılımına ilişkin; uzmanlık alanı, zorunlu-seçmeli, genel kültür boyutlarına yönelik ilke ve yöntemleri içeren tanımlı süreçler bulunmaktadır. [cite: 5]",
+                    "Ders dağılımı dengesine ilişkin tanımlı süreçlere uygun olarak kurum genelinde uygulamalar bulunmaktadır. [cite: 5]",
+                    "Programlarda ders dağılım dengesi izlenmekte ve iyileştirilmektedir. [cite: 5]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 5]"
                 ],
                 checks: [
-                    "Ders dağılımına ilişkin ilke, kural ve yöntemler tanımlı mı?",
-                    "Öğretim elemanlarının uzmanlık alanları ve iş yükleri gözetilmiş mi?",
-                    "Öğretim programı zorunlu-seçmeli ve alan-alan dışı ders dengesini gözetiyor mu?",
-                    "Kültürel derinlik kazanma, farklı disiplinleri tanıma imkânları sunuluyor mu?",
-                    "İlan edilmiş ders bilgi paketlerinde ders dağılım dengesi gözetilmiş mi?",
-                    "Ders dağılım dengesi sistematik olarak izleniyor ve iyileştiriliyor mu?"
+                    "Ders dağılımına ilişkin ilke, kural ve yöntemler tanımlı mı? [cite: 5]",
+                    "Öğretim elemanlarının uzmanlık alanları ve iş yükleri gözetilmiş mi? [cite: 5]",
+                    "Öğretim programı zorunlu-seçmeli ve alan-alan dışı ders dengesini gözetiyor mu? [cite: 5]",
+                    "Kültürel derinlik kazanma, farklı disiplinleri tanıma imkânları sunuluyor mu? [cite: 5]",
+                    "İlan edilmiş ders bilgi paketlerinde ders dağılım dengesi gözetilmiş mi? [cite: 5]",
+                    "Ders dağılım dengesi sistematik olarak izleniyor ve iyileştiriliyor mu? [cite: 5]"
                 ]
             },
             {
                 id: "B.1.3", name: "Ders kazanımlarının program çıktılarıyla uyumu", max: 5,
                 levels: [
-                    "Ders kazanımları program çıktıları ile eşleştirilmemiştir.",
-                    "Ders kazanımlarının oluşturulması ve program çıktılarıyla uyumlu hale getirilmesine ilişkin ilke, yöntem ve sınıflamaları içeren tanımlı süreçler bulunmaktadır.",
-                    "Ders kazanımları programların genelinde program çıktılarıyla uyumlandırılmıştır ve ders bilgi paketleri ile paylaşılmaktadır.",
-                    "Ders kazanımlarının program çıktılarıyla uyumu izlenmekte ve iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Ders kazanımları program çıktıları ile eşleştirilmemiştir. [cite: 7]",
+                    "Ders kazanımlarının oluşturulması ve program çıktılarıyla uyumlu hale getirilmesine ilişkin ilke, yöntem ve sınıflamaları içeren tanımlı süreçler bulunmaktadır. [cite: 7]",
+                    "Ders kazanımları programların genelinde program çıktılarıyla uyumlandırılmıştır ve ders bilgi paketleri ile paylaşılmaktadır. [cite: 7]",
+                    "Ders kazanımlarının program çıktılarıyla uyumu izlenmekte ve iyileştirilmektedir. [cite: 7]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir and örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 7]"
                 ],
                 checks: [
-                    "Derslerin öğrenme kazanımları (karma ve uzaktan eğitim dahil) tanımlanmış mı?",
-                    "Program çıktıları ile ders kazanımları eşleştirmesi (matris) oluşturulup ilan edilmiş mi?",
-                    "Kazanımların ifade şekli öngörülen bilişsel, duyuşsal ve devinimsel seviyeyi açıkça belirtiyor mu?",
-                    "Program dışından alınan derslerin program çıktılarıyla uyumu gösterilmiş mi?",
-                    "Ders kazanımlarının gerçekleşip gerçekleşmediği izleniyor ve iyileştiriliyor mu?"
+                    "Derslerin öğrenme kazanımları (karma ve uzaktan eğitim dahil) tanımlanmış mı? [cite: 7]",
+                    "Program çıktıları ile ders kazanımları eşleştirmesi (matris) oluşturulup ilan edilmiş mi? [cite: 7]",
+                    "Kazanımların ifade şekli öngörülen bilişsel, duyuşsal ve devinimsel seviyeyi açıkça belirtiyor mu? [cite: 7]",
+                    "Program dışından alınan derslerin program çıktılarıyla uyumu gösterilmiş mi? [cite: 7]",
+                    "Ders kazanımlarının gerçekleşip gerçekleşmediği izleniyor ve iyileştiriliyor mu? [cite: 7]"
                 ]
             },
             {
                 id: "B.1.4", name: "Öğrenci iş yüküne dayalı ders tasarımı", max: 5,
                 levels: [
-                    "Dersler öğrenci iş yüküne dayalı olarak tasarlanmamıştır.",
-                    "Öğrenci iş yükünün hesaplanmasına ilişkin, staj ve hareketlilik gibi boyutları içeren tanımlı süreçler bulunmaktadır.",
-                    "Programlarda dersler öğrenci iş yüküne uygun olarak tasarlanmış, ilan edilmiş ve uygulamaya konulmuştur.",
-                    "Dersler öğrenci iş yüküne dayalı olarak izlenmekte ve buna göre ders tasarımı güncellenmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Dersler öğrenci iş yüküne dayalı olarak tasarlanmamıştır. [cite: 9]",
+                    "Öğrenci iş yükünün hesaplanmasına ilişkin, staj ve hareketlilik gibi boyutları içeren tanımlı süreçler bulunmaktadır. [cite: 9]",
+                    "Programlarda dersler öğrenci iş yüküne uygun olarak tasarlanmış, ilan edilmiş ve uygulamaya konulmuştur. [cite: 9]",
+                    "Dersler öğrenci iş yüküne dayalı olarak izlenmekte ve buna göre ders tasarımı güncellenmektedir. [cite: 9]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 9]"
                 ],
                 checks: [
-                    "Tüm derslerin AKTS değeri (iş yükü) web sayfası üzerinden paylaşılmış mı?",
-                    "Tanımlanan iş yükü, öğrencilerin gerçek iş yükü takibi ile doğrulanıyor mu?",
-                    "Staj ve uygulamalı öğrenme fırsatları iş yükü ve kredi çerçevesinde değerlendirilmiş mi?",
-                    "İş yükü temelli kredilerin transferi ve tanınmasına ilişkin tanımlı süreçler (Diploma Eki vb.) var mı?",
-                    "İş yükü belirlenirken ve güncellenirken öğrenci katılımı ve geri bildirimleri sağlanmış mı?"
+                    "Tüm derslerin AKTS değeri (iş yükü) web sayfası üzerinden paylaşılmış mı? [cite: 9]",
+                    "Tanımlanan iş yükü, öğrencilerin gerçek iş yükü takibi ile doğrulanıyor mu? [cite: 9]",
+                    "Staj ve uygulamalı öğrenme fırsatları iş yükü ve kredi çerçevesinde değerlendirilmiş mi? [cite: 9]",
+                    "İş yükü temelli kredilerin transferi ve tanınmasına ilişkin tanımlı süreçler (Diploma Eki vb.) var mı? [cite: 9]",
+                    "İş yükü belirlenirken ve güncellenirken öğrenci katılımı ve geri bildirimleri sağlanmış mı? [cite: 9]"
                 ]
             },
             {
                 id: "B.1.5", name: "Programların izlenmesi ve güncellenmesi", max: 5,
                 levels: [
-                    "Program çıktılarının izlenmesine ve güncellenmesine ilişkin mekanizma bulunmamaktadır.",
-                    "Program çıktılarının izlenmesine ve güncellenmesine ilişkin periyot, ilke, kural ve göstergeler oluşturulmuştur.",
-                    "Programların genelinde program çıktılarının izlenmesine ve güncellenmesine ilişkin mekanizmalar işletilmektedir.",
-                    "Program çıktıları bu mekanizmalar ile izlenmekte ve ilgili paydaşların görüşleri de alınarak güncellenmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Program çıktılarının izlenmesine ve güncellenmesine ilişkin mekanizma bulunmamaktadır. [cite: 16]",
+                    "Program çıktılarının izlenmesine ve güncellenmesine ilişkin periyot, ilke, kural ve göstergeler oluşturulmuştur. [cite: 16]",
+                    "Programların genelinde program çıktılarının izlenmesine ve güncellenmesine ilişkin mekanizmalar işletilmektedir. [cite: 16]",
+                    "Program çıktıları bu mekanizmalar ile izlenmekte ve ilgili paydaşların görüşleri de alınarak güncellenmektedir. [cite: 16]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 16]"
                 ],
                 checks: [
-                    "Program ve ders (örgün, uzaktan vb.) amaçlarının/çıktılarının izlenmesi planlandığı şekilde gerçekleşiyor mu?",
-                    "İşleyiş ve sonuçlar iç/dış paydaşlarla birlikte değerlendiriliyor mu?",
-                    "Eğitim istatistikleri (ders, öğrenci sayıları, başarı durumları, geri besleme sonuçları) periyodik izleniyor mu?",
-                    "Programların yıllık öz değerlendirme raporları hazırlanıyor mu?",
-                    "Yapılan izlemeler doğrultusunda iyileştirmeler (güncellemeler) yapılıyor ve paydaşlar bilgilendiriliyor mu?"
+                    "Program ve ders (örgün, uzaktan vb.) amaçlarının/çıktılarının izlenmesi planlandığı şekilde gerçekleşiyor mu? [cite: 16]",
+                    "İşleyiş ve sonuçlar iç/dış paydaşlarla birlikte değerlendiriliyor mu? [cite: 16]",
+                    "Eğitim istatistikleri (ders, öğrenci sayıları, başarı durumları, geri besleme sonuçları) periyodik izleniyor mu? [cite: 16]",
+                    "Programların yıllık öz değerlendirme raporları hazırlanıyor mu? [cite: 20]",
+                    "Yapılan izlemeler doğrultusunda iyileştirmeler (güncellemeler) yapılıyor ve paydaşlar bilgilendiriliyor mu? [cite: 20]"
                 ]
             },
             {
                 id: "B.1.6", name: "Eğitim ve öğretim süreçlerinin yönetimi", max: 5,
                 levels: [
-                    "Kurumda eğitim ve öğretim süreçlerini bütüncül olarak yönetmek üzere bir sistem bulunmamaktadır.",
-                    "Kurumda eğitim ve öğretim yönetim sistemine ilişkin ilke ve kurallar bulunmaktadır.",
-                    "Kurumun genelinde eğitim ve öğretim süreçleri belirlenmiş ilkelere uygun bütüncül olarak yönetilmektedir.",
-                    "Kurumda eğitim ve öğretim süreçleri izlenmekte ve izlem sonuçlarına göre iyileştirme yapılmaktadır.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda eğitim ve öğretim süreçlerini bütüncül olarak yönetmek üzere bir sistem bulunmamaktadır. [cite: 27]",
+                    "Kurumda eğitim ve öğretim yönetim sistemine ilişkin ilke ve kurallar bulunmaktadır. [cite: 27]",
+                    "Kurumun genelinde eğitim ve öğretim süreçleri belirlenmiş ilkelere uygun bütüncül olarak yönetilmektedir. [cite: 27]",
+                    "Kurumda eğitim ve öğretim süreçleri izlenmekte ve izlem sonuçlarına göre iyileştirme yapılmaktadır. [cite: 27]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 27]"
                 ],
                 checks: [
-                    "Süreçleri yönetmek için organizasyonel yapılanma (Eğitim komisyonu, ÖYEM vb.) mevcut mu?",
-                    "Süreçlerin takibi için altyapıya (Bilgi Yönetim Sistemi) ve uzman insan kaynağına sahip mi?",
-                    "Süreçlere ilişkin görev ve sorumluluklar net olarak tanımlanmış mı?",
-                    "Programların tasarlanması, yürütülmesi ve güncellenmesi faaliyetlerine ilişkin takvim ve esaslar belirli mi?",
-                    "Eğitim verme biçimi (örgün, uzaktan), öğretim yöntemi ve ölçme uyumu koordinasyonu üst yönetimce takip ediliyor mu?"
+                    "Süreçleri yönetmek için organizasyonel yapılanma (Eğitim komisyonu, ÖYEM vb.) mevcut mu? [cite: 27]",
+                    "Süreçlerin takibi için altyapıya (Bilgi Yönetim Sistemi) ve uzman insan kaynağına sahip mi? [cite: 27]",
+                    "Süreçlere ilişkin görev ve sorumluluklar net olarak tanımlanmış mı? [cite: 27]",
+                    "Programların tasarlanması, yürütülmesi ve güncellenmesi faaliyetlerine ilişkin takvim ve esaslar belirli mi? [cite: 27]",
+                    "Eğitim verme biçimi (örgün, uzaktan), öğretim yöntemi ve ölçme uyumu koordinasyonu üst yönetimce takip ediliyor mu? [cite: 27]"
                 ]
             }
         ]
@@ -305,69 +302,69 @@ const rubricData = [
             {
                 id: "B.2.1", name: "Öğretim yöntem ve teknikleri", max: 5,
                 levels: [
-                    "Öğrenme-öğretme süreçlerinde öğrenci merkezli uygulamalar bulunmamaktadır.",
-                    "Öğrenci merkezli öğrenme-öğretme süreçlerinde uygulanmasına yönelik ilke, kural ve planlamalar bulunmaktadır.",
-                    "Programların genelinde öğrenci merkezli öğretim yöntem teknikleri tanımlı süreçler doğrultusunda uygulanmaktadır.",
-                    "Öğrenci merkezli yaklaşımın uygulamaları izlenmekte ve paydaşların katılımıyla iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Öğrenme-öğretme süreçlerinde öğrenci merkezli uygulamalar bulunmamaktadır. [cite: 28]",
+                    "Öğrenci merkezli öğrenme-öğretme süreçlerinde uygulanmasına yönelik ilke, kural ve planlamalar bulunmaktadır. [cite: 28]",
+                    "Programların genelinde öğrenci merkezli öğretim yöntem teknikleri tanımlı süreçler doğrultusunda uygulanmaktadır. [cite: 28]",
+                    "Öğrenci merkezli yaklaşımın uygulamaları izlenmekte ve paydaşların katılımıyla iyileştirilmektedir. [cite: 28]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 28]"
                 ],
                 checks: [
-                    "Öğretim yöntemleri öğrenciyi aktif hale getiren ve etkileşimli öğrenme odaklı mı?",
-                    "Bilgi aktarımından çok derin öğrenmeye, öğrencinin ilgi, motivasyon ve bağlılığına odaklanılmış mı?",
-                    "Ders bilgi paketlerinde öğrenci merkezli öğretim yöntemlerinin varlığı kanıtlanmış mı?",
-                    "Öğrencilerin araştırma süreçlerine katılımı proje, müfredat vb. yaklaşımlarla destekleniyor mu?",
-                    "Eğiticilerin eğitimi programlarında öğrenci merkezli öğrenme-öğretme yaklaşımına ilişkin uygulamalar var mı?"
+                    "Öğretim yöntemleri öğrenciyi aktif hale getiren ve etkileşimli öğrenme odaklı mı? [cite: 28]",
+                    "Bilgi aktarımından çok derin öğrenmeye, öğrencinin ilgi, motivasyon ve bağlılığına odaklanılmış mı? [cite: 28]",
+                    "Ders bilgi paketlerinde öğrenci merkezli öğretim yöntemlerinin varlığı kanıtlanmış mı? [cite: 28]",
+                    "Öhrencilerin araştırma süreçlerine katılımı proje, müfredat vb. yaklaşımlarla destekleniyor mu? [cite: 28]",
+                    "Eğiticilerin eğitimi programlarında öğrenci merkezli öğrenme-öğretme yaklaşımına ilişkin uygulamalar var mı? [cite: 28]"
                 ]
             },
             {
                 id: "B.2.2", name: "Ölçme ve değerlendirme", max: 5,
                 levels: [
-                    "Kurumda öğrenci merkezli ölçme ve değerlendirme yaklaşımları bulunmamaktadır.",
-                    "Öğrenci merkezli ölçme ve değerlendirmeye ilişkin ilke, kural ve planlamalar bulunmaktadır.",
-                    "Programların genelinde öğrenci merkezli ölçme ve değerlendirme uygulamaları bulunmaktadır.",
-                    "Öğrenci merkezli ölçme ve değerlendirme uygulamaları izlenmekte ve ilgili iç paydaşların katılımıyla iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir, çeşitlendirilmiş ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda öğrenci merkezli ölçme ve değerlendirme yaklaşımları bulunmamaktadır. [cite: 35]",
+                    "Öğrenci merkezli ölçme ve değerlendirmeye ilişkin ilke, kural ve planlamalar bulunmaktadır. [cite: 35]",
+                    "Programların genelinde öğrenci merkezli ölçme ve değerlendirme uygulamaları bulunmaktadır. [cite: 35]",
+                    "Öğrenci merkezli ölçme ve değerlendirme uygulamaları izlenmekte ve ilgili iç paydaşların katılımıyla iyileştirilmektedir. [cite: 35]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir, çeşitlendirilmiş ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 35]"
                 ],
                 checks: [
-                    "Ölçme ve değerlendirme, yetkinlik ve performans temelinde yürütülüyor mu?",
-                    "Değerlendirmenin sürekliliği için formatif (ödev, proje, portfolyo) yöntemler kullanılarak çeşitlendirilmiş mi?",
-                    "Eğitim türüne (örgün, uzaktan, karma) uygun, şeffaf sınav yöntemleri uygulanıyor mu?",
-                    "Sınav güvenliği, çevrimiçi sınavlar ve dezavantajlı gruplara yönelik sınav uygulamaları için mekanizmalar var mı?",
-                    "Ölçme-değerlendirme sonuçları, uygulamaların güvenirliğini artırmak için öğrenci-öğretim elemanı geri bildirimiyle irdeleniyor mu?"
+                    "Ölçme ve değerlendirme, yetkinlik ve performans temelinde yürütülüyor mu? [cite: 35]",
+                    "Değerlendirmenin sürekliliği için formatif (ödev, proje, portfolyo) yöntemler kullanılarak çeşitlendirilmiş mi? [cite: 35]",
+                    "Eğitim türüne (örgün, uzaktan, karma) uygun, şeffaf sınav yöntemleri uygulanıyor mu? [cite: 35]",
+                    "Sınav güvenliği, çevrimiçi sınavlar ve dezavantajlı gruplara yönelik sınav uygulamaları için mekanizmalar var mı? [cite: 35]",
+                    "Ölçme-değerlendirme sonuçları, uygulamaların güvenirliğini artırmak için öğrenci-öğretim elemanı geri bildirimiyle irdeleniyor mu? [cite: 35]"
                 ]
             },
             {
                 id: "B.2.3", name: "Öğrenci kabulü ve önceki öğrenmenin tanınması", max: 5,
                 levels: [
-                    "Kurumda öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin süreçler tanımlanmamıştır.",
-                    "Kurumda öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin ilke, kural ve bağlı planlar bulunmaktadır.",
-                    "Kurumun genelinde öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin planlar dahilinde uygulamalar bulunmaktadır.",
-                    "Öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin süreçler izlenmekte, iyileştirilmekte ve güncellemeler ilan edilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin süreçler tanımlanmamıştır. [cite: 38]",
+                    "Kurumda öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin ilke, kural ve bağlı planlar bulunmaktadır. [cite: 38]",
+                    "Kurumun genelinde öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin planlar dahilinde uygulamalar bulunmaktadır. [cite: 38]",
+                    "Öğrenci kabulü, önceki öğrenmenin tanınması ve kredilendirilmesine ilişkin süreçler izlenmekte, iyileştirilmekte ve güncellemeler ilan edilmektedir. [cite: 38]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 38]"
                 ],
                 checks: [
-                    "Öğrenci kabulüne (merkezi yerleştirme dışı dâhil) ilişkin ilke ve kurallar tanımlanmış ve ilan edilmiş mi?",
-                    "Önceki öğrenmelerin (örgün, yaygın, serbest) tanınması ve kredilendirilmesi öğrenci iş yükü temelli yapılıyor mu?",
-                    "Uluslararasılaşma politikasına paralel öğrenci hareketliliğinde kredi kaybı olmaması yönünde uygulamalar var mı?",
-                    "Diploma, sertifika gibi belge talepleri sistem üzerinden titizlikle takip ediliyor mu?",
-                    "Uygulamaların tanımlı süreçlerle uyumu ve sürekliliği paydaşlara ilan edilip izleniyor mu?"
+                    "Öğrenci kabulüne (merkezi yerleştirme dışı dâhil) ilişkin ilke ve kurallar tanımlanmış ve ilan edilmiş mi? [cite: 38]",
+                    "Önceki öğrenmelerin (örgün, yaygın, serbest) tanınması ve kredilendirilmesi öğrenci iş yükü temelli yapılıyor mu? [cite: 38]",
+                    "Uluslararasılaşma politikasına paralel öğrenci hareketliliğinde kredi kaybı olmaması yönünde uygulamalar var mı? [cite: 38]",
+                    "Diploma, sertifika gibi belge talepleri sistem üzerinden titizlikle takip ediliyor mu? [cite: 38]",
+                    "Uygulamaların tanımlı süreçlerle uyumu ve sürekliliği paydaşlara ilan edilip izleniyor mu? [cite: 38]"
                 ]
             },
             {
                 id: "B.2.4", name: "Yeterliliklerin sertifikalandırılması ve diploma", max: 5,
                 levels: [
-                    "Kurumda diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin süreçler tanımlanmamıştır.",
-                    "Kurumda diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin kapsamlı, tutarlı ve ilan edilmiş ilke, kural ve süreçler bulunmaktadır.",
-                    "Kurumun genelinde diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin uygulamalar bulunmaktadır.",
-                    "Uygulamalar izlenmekte ve tanımlı süreçler iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin süreçler tanımlanmamıştır. [cite: 41]",
+                    "Kurumda diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin kapsamlı, tutarlı ve ilan edilmiş ilke, kural ve süreçler bulunmaktadır. [cite: 41]",
+                    "Kurumun genelinde diploma onayı ve diğer yeterliliklerin sertifikalandırılmasına ilişkin uygulamalar bulunmaktadır. [cite: 41]",
+                    "Uygulamalar izlenmekte ve tanımlı süreçler iyileştirilmektedir. [cite: 41]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 41]"
                 ],
                 checks: [
-                    "Yeterliliklerin onayı, mezuniyet koşulları ve karar süreçleri açık, kapsamlı ve tutarlı şekilde tanımlanmış mı?",
-                    "Sertifikalandırma ve diploma işlemleri ilan edilmiş sürece uygun olarak yürütülüyor mu?",
-                    "Öğrencinin akademik ve kariyer gelişimini izlemek için mekanizmalar ve mevcut uygulamalar var mı?",
-                    "Yatay geçiş, ÇAP, Yandal, Yabancı Uyruklu Öğrenci (YÖS) kabullerinde adil ve şeffaf kriterler uygulanıyor mu?",
-                    "Tüm bu sertifikalandırma ve onama süreçleri sistematik olarak izleniyor ve gerekli önlemler alınıyor mu?"
+                    "Yeterliliklerin onayı, mezuniyet koşulları ve karar süreçleri açık, kapsamlı ve tutarlı şekilde tanımlanmış mı? [cite: 41]",
+                    "Sertifikalandırma ve diploma işlemleri ilan edilmiş sürece uygun olarak yürütülüyor mu? [cite: 41]",
+                    "Öğrencinin akademik ve kariyer gelişimini izlemek için mekanizmalar var mı? [cite: 41]",
+                    "Yatay geçiş, ÇAP, Yandal, Yabancı Uyruklu Öğrenci (YÖS) kabullerinde adil ve şeffaf kriterler uygulanıyor mu? [cite: 41]",
+                    "Tüm bu sertifikalandırma ve onama süreçleri sistematik olarak izleniyor ve gerekli önlemler alınıyor mu? [cite: 41]"
                 ]
             }
         ]
@@ -378,86 +375,86 @@ const rubricData = [
             {
                 id: "B.3.1", name: "Öğrenme ortam ve kaynakları", max: 5,
                 levels: [
-                    "Kurumun eğitim-öğretim faaliyetlerini sürdürebilmek için yeterli kaynağı bulunmamaktadır.",
-                    "Kurumun eğitim-öğretim faaliyetlerini sürdürebilmek için uygun nitelik ve nicelikte öğrenme kaynaklarının oluşturulmasına yönelik planları vardır.",
-                    "Kurumun genelinde öğrenme kaynaklarının yönetimi alana özgü koşullar, erişilebilirlik ve birimler arası denge gözetilerek gerçekleştirilmektedir.",
-                    "Öğrenme kaynaklarının geliştirilmesine ve kullanımına yönelik izleme ve iyileştirme yapılmaktadır.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumun eğitim-öğretim faaliyetlerini sürdürebilmek için yeterli kaynağı bulunmamaktadır. [cite: 44]",
+                    "Kurumun eğitim-öğretim faaliyetlerini sürdürebilmek için uygun nitelik ve nicelikte öğrenme kaynaklarının oluşturulmasına yönelik planları vardır. [cite: 44]",
+                    "Kurumun genelinde öğrenme kaynaklarının yönetimi alana özgü koşullar, erişilebilirlik ve birimler arası denge gözetilerek gerçekleştirilmektedir. [cite: 44]",
+                    "Öğrenme kaynaklarının geliştirilmesine ve kullanımına yönelik izleme ve iyileştirme yapılmaktadır. [cite: 44]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 44]"
                 ],
                 checks: [
-                    "Sınıf, laboratuvar, kütüphane, stüdyo ve e-kaynaklar uygun nitelik/nicelikte ve öğrencilerin erişimine açık mı?",
-                    "Kullanıcı dostu, ölçme ve değerlendirme olanaklarına sahip bir öğrenme yönetim sistemi (LMS) mevcut mu?",
-                    "Öğrenme ortamı öğrenci-öğrenci, öğrenci-öğretmen ve öğrenci-materyal etkileşimini geliştirecek yapıya sahip mi?",
-                    "Sunulan kaynaklarla ilgili öğrencilerden düzenli geri bildirim (anketler vb.) alınıyor mu?",
-                    "Öğrenme kaynaklarının yeterlilik durumu izlenip kurumsal ihtiyaçlara göre periyodik olarak iyileştiriliyor mu?"
+                    "Sınıf, laboratuvar, kütüphane, stüdyo ve e-kaynaklar uygun nitelik/nicelikte ve öğrencilerin erişimine açık mı? [cite: 44]",
+                    "Kullanıcı dostu, ölçme ve değerlendirme olanaklarına sahip bir öğrenme yönetim sistemi (LMS) mevcut mu? [cite: 44]",
+                    "Öğrenme ortamı öğrenci-öğrenci, öğrenci-öğretmen ve öğrenci-materyal etkileşimini geliştirecek yapıya sahip mi? [cite: 44]",
+                    "Sunulan kaynaklarla ilgili öğrencilerden düzenli geri bildirim (anketler vb.) alınıyor mu? [cite: 44]",
+                    "Öğrenme kaynaklarının yeterlilik durumu izlenip kurumsal ihtiyaçlara göre periyodik olarak iyileştiriliyor mu? [cite: 44]"
                 ]
             },
             {
                 id: "B.3.2", name: "Akademik destek hizmetleri", max: 5,
                 levels: [
-                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlamasına yönelik destek hizmetleri bulunmamaktadır.",
-                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlaması süreçlerine ilişkin tanımlı ilke ve kurallar bulunmaktadır.",
-                    "Kurumda öğrencilerin akademik gelişim ve kariyer planlamasına yönelik destek hizmetleri tanımlı ilke ve kurallar dahilinde yürütülmektedir.",
-                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlamasına ilişkin uygulamalar izlenmekte ve öğrencilerin katılımıyla iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlamasına yönelik destek hizmetleri bulunmamaktadır. [cite: 53]",
+                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlaması süreçlerine ilişkin tanımlı ilke ve kurallar bulunmaktadır. [cite: 56]",
+                    "Kurumda öğrencilerin akademik gelişim ve kariyer planlamasına yönelik destek hizmetleri tanımlı ilke ve kurallar dahilinde yürütülmektedir. [cite: 58]",
+                    "Kurumda öğrencilerin akademik gelişimi ve kariyer planlamasına ilişkin uygulamalar izlenmekte ve öğrencilerin katılımıyla iyileştirilmektedir. [cite: 61, 62, 63]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 64, 65, 66, 67, 68]"
                 ],
                 checks: [
-                    "Öğrencinin akademik gelişimini ve sorunlarını takip eden bir akademik danışmanlık sistemi mevcut mu?",
-                    "Öğrencilerin danışmanlarına yüz yüze ve çevrimiçi erişim olanakları sağlanmış mı?",
-                    "Danışmanlık süreçleri portfolyo, bilgi sistemi vb. yöntemlerle kayıt altına alınıyor mu?",
-                    "Erişilebilir psikolojik danışmanlık ve kariyer merkezi hizmetleri öğrencilerin bilgisine sunulmuş mu?",
-                    "Sağlanan akademik/psikolojik destek hizmetlerinin kalitesi ve yeterliliği izlenip iyileştiriliyor mu?"
+                    "Öğrencinin akademik gelişimini bve sorunlarını takip eden bir akademik danışmanlık sistemi mevcut mu? [cite: 48]",
+                    "Öğrencilerin danışmanlarına yüz yüze ve çevrimiçi erişim olanakları sağlanmış mı? [cite: 50]",
+                    "Danışmanlık süreçleri portfolyo, bilgi sistemi vb. yöntemlerle kayıt altına alınıyor mu? [cite: 49]",
+                    "Erişilebilir psikolojik danışmanlık ve kariyer merkezi hizmetleri öğrencilerin bilgisine sunulmuş mu? [cite: 51]",
+                    "Sağlanan akademik/psikolojik destek hizmetlerinin kalitesi ve yeterliliği izlenip iyileştiriliyor mu? [cite: 51]"
                 ]
             },
             {
                 id: "B.3.3", name: "Tesis ve altyapılar", max: 5,
                 levels: [
-                    "Kurumda uygun nitelik ve nicelikte tesisler ve altyapı bulunmamaktadır.",
-                    "Kurumda uygun nitelik ve nicelikte tesis ve altyapının kurulmasına ve kullanımına ilişkin planlamalar bulunmaktadır.",
-                    "Kurumun genelinde tesis ve altyapı erişilebilirdir ve bunlardan fırsat eşitliğine dayalı olarak yararlanılmaktadır.",
-                    "Tesis ve altyapının kullanımı izlenmekte ve ihtiyaçlar doğrultusunda iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda uygun nitelik ve nicelikte tesisler ve altyapı bulunmamaktadır. [cite: 76]",
+                    "Kurumda uygun nitelik ve nicelikte tesis ve altyapının kurulmasına ve kullanımına ilişkin planlamalar bulunmaktadır. [cite: 76]",
+                    "Kurumun genelinde tesis ve altyapı erişilebilirdir ve bunlardan fırsat eşitliğine dayalı olarak yararlanılmaktadır. [cite: 76]",
+                    "Tesis ve altyapının kullanımı izlenmekte ve ihtiyaçlar doğrultusunda iyileştirilmektedir. [cite: 76]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 76]"
                 ],
                 checks: [
-                    "Yemekhane, yurt, sağlık, ulaşım, bilişim hizmetleri gibi altyapılar ihtiyaca uygun nitelik ve nicelikte mi?",
-                    "Kurumda uzaktan eğitim programları varsa; bunlara yönelik donanım, yazılım ve stüdyo altyapısı yeterli mi?",
-                    "Tesis ve altyapılar öğrencilerin kolayca erişebileceği şekilde planlanmış mı?",
-                    "Altyapı hizmetlerinin sunumunda fırsat eşitliği ve adil dağılım gözetilmiş mi?",
-                    "Tesislerin kullanımı izleniyor ve artan öğrenci sayısına / kurumsal büyümeye orantılı geliştiriliyor mu?"
+                    "Yemekhane, yurt, sağlık, ulaşım, bilişim hizmetleri gibi altyapılar ihtiyaca uygun nitelik ve nicelikte mi? [cite: 76]",
+                    "Kurumda uzaktan eğitim programları varsa; bunlara yönelik donanım, yazılım ve stüdyo altyapısı yeterli mi? [cite: 76]",
+                    "Tesis ve altyapılar öğrencilerin kolayca erişebileceği şekilde planlanmış mı? [cite: 76]",
+                    "Altyapı hizmetlerinin sunumunda fırsat eşitliği ve adil dağılım gözetilmiş mi? [cite: 76]",
+                    "Tesislerin kullanımı izleniyor ve artan öğrenci sayısına orantılı geliştiriliyor mu? [cite: 76]"
                 ]
             },
             {
                 id: "B.3.4", name: "Dezavantajlı gruplar", max: 5,
                 levels: [
-                    "Kurumda dezavantajlı grupların eğitim olanaklarına erişimine ilişkin planlamalar bulunmamaktadır.",
-                    "Dezavantajlı grupların eğitim olanaklarına nitelikli ve adil erişimine ilişkin planlamalar bulunmaktadır.",
-                    "Dezavantajlı grupların eğitim olanaklarına erişimine yönelik uygulamalar yürütülmektedir.",
-                    "Dezavantajlı grupların eğitim olanaklarına erişimi izlenmekte ve grupların görüşleri alınarak iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda dezavantajlı grupların eğitim olanaklarına erişimine ilişkin planlamalar bulunmamaktadır. [cite: 79]",
+                    "Dezavantajlı grupların eğitim olanaklarına nitelikli ve adil erişimine ilişkin planlamalar bulunmaktadır. [cite: 79]",
+                    "Dezavantajlı grupların eğitim olanaklarına erişimine yönelik uygulamalar yürütülmektedir. [cite: 79]",
+                    "Dezavantajlı grupların eğitim olanaklarına erişimi izlenmekte ve grupların görüşleri alınarak iyileştirilmektedir. [cite: 79]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 79]"
                 ],
                 checks: [
-                    "Engelli, yoksul, azınlık, göçmen vb. dezavantajlı grupların eğitime erişimi planlanmış mı?",
-                    "Erişimde eşitlik, hakkaniyet, çeşitlilik ve kapsayıcılık ilkeleri gözetiliyor mu?",
-                    "Uzaktan eğitim altyapısı bu grupların özellikleri ve ihtiyaçları dikkate alınarak (örn. erişilebilirlik seçenekleri) tasarlanmış mı?",
-                    "Yerleşkelerde Engelsiz Üniversite uygulamaları faal olarak kullanılıyor mu?",
-                    "Eğitim olanaklarına erişim takip edilerek, doğrudan bu grupların geri bildirimleri doğrultusunda sistem iyileştiriliyor mu?"
+                    "Engelli, yoksul, azınlık, göçmen vb. dezavantajlı grupların eğitime erişimi planlanmış mı? [cite: 79]",
+                    "Erişimde eşitlik, hakkaniyet, çeşitlilik ve kapsayıcılık ilkeleri gözetiliyor mu? [cite: 79]",
+                    "Uzaktan eğitim altyapısı bu grupların özellikleri ve ihtiyaçları dikkate alınarak tasarlanmış mı? [cite: 79]",
+                    "Yerleşkelerde Engelsiz Üniversite uygulamaları faal olarak kullanılıyor mu? [cite: 79]",
+                    "Eğitim olanaklarına erişim takip edilerek geri bildirimler doğrultusunda sistem iyileştiriliyor mu? [cite: 79]"
                 ]
             },
             {
                 id: "B.3.5", name: "Sosyal, kültürel, sportif faaliyetler", max: 5,
                 levels: [
-                    "Kurumda uygun nitelik ve nicelikte sosyal, kültürel ve sportif faaliyet olanakları bulunmamaktadır.",
-                    "Sosyal, kültürel ve sportif faaliyet olanaklarının yaratılmasına ilişkin planlamalar bulunmaktadır.",
-                    "Kurumun genelinde sosyal, kültürel ve sportif faaliyetler erişilebilirdir ve fırsat eşitliğine dayalı olarak yararlanılmaktadır.",
-                    "Sosyal, kültürel ve sportif faaliyet mekanizmaları izlenmekte, ihtiyaçlar doğrultusunda çeşitlendirilmekte ve iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda uygun nitelik ve nicelikte sosyal, kültürel ve sportif faaliyet olanakları bulunmamaktadır. [cite: 82]",
+                    "Sosyal, kültürel ve sportif faaliyet olanaklarının yaratılmasına ilişkin planlamalar bulunmaktadır. [cite: 82]",
+                    "Kurumun genelinde sosyal, kültürel ve sportif faaliyetler erişilebilirdir ve fırsat eşitliğine dayalı olarak yararlanılmaktadır. [cite: 82]",
+                    "Sosyal, kültürel ve sportif faaliyet mekanizmaları izlenmekte, ihtiyaçlar doğrultusunda çeşitlendirilmekte ve iyileştirilmektedir. [cite: 82]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 82]"
                 ],
                 checks: [
-                    "Öğrenci topluluklarına faaliyetleri için mekân, bütçe ve rehberlik desteği sağlanıyor mu?",
-                    "Sosyal, kültürel, sportif faaliyetleri planlayan, yürüten ve yöneten aktif bir idari örgütlenme (SKS vb.) mevcut mu?",
-                    "Yıl içerisinde öğrencilere yönelik çeşitli ve yeterli sayıda faaliyet düzenleniyor mu?",
-                    "Bu faaliyetlerin tüm öğrencilere erişilebilir olduğu ve fırsat eşitliğini gözettiğine dair kanıtlar var mı?",
-                    "Gerçekleştirilen faaliyetlerin katılımı ve memnuniyeti izlenerek, öğrenci talepleri doğrultusunda iyileştirmeler yapılıyor mu?"
+                    "Öğrenci topluluklarına faaliyetleri için mekân, bütçe ve rehberlik desteği sağlanıyor mu? [cite: 82]",
+                    "Sosyal, kültürel, sportif faaliyetleri planlayan, yürüten ve yöneten aktif bir idari örgütlenme mevcut mu? [cite: 82]",
+                    "Yıl içerisinde öğrencilere yönelik çeşitli ve yeterli sayıda faaliyet düzenleniyor mu? [cite: 82]",
+                    "Bu faaliyetlerin tüm öğrencilere erişilebilir olduğu ve fırsat eşitliğini gözettiğine dair kanıtlar var mı? [cite: 82]",
+                    "Gerçekleştirilen faaliyetlerin katılımı izlenerek öğrenci talepleri doğrultusunda iyileştirmeler yapılıyor mu? [cite: 82]"
                 ]
             }
         ]
@@ -468,52 +465,52 @@ const rubricData = [
             {
                 id: "B.4.1", name: "Atama, yükseltme ve görevlendirme", max: 5,
                 levels: [
-                    "Kurumun atama, yükseltme ve görevlendirme kriterleri tanımlanmamış.",
-                    "Kurumun atama yükseltme ve görevlendirme kriterleri tanımlanmış; ancak uygulama sonuçları irdelenmemiştir.",
-                    "Kurumun alanlar için tanımlı ve paydaşlarca bilinen atama, yükseltme ve görevlendirme kriterleri uygulanmakta ve karar almalarda kullanılmaktadır.",
-                    "Kurumun atama, yükseltme ve görevlendirme uygulamalarının sonuçları izlenmekte ve değerlendirilerek önlemler alınmaktadır.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumun atama, yükseltme ve görevlendirme kriterleri tanımlanmamış. [cite: 85]",
+                    "Kurumun atama yükseltme ve görevlendirme kriterleri tanımlanmış; ancak uygulama sonuçları irdelenmemiştir. [cite: 85]",
+                    "Kurumun alanlar için tanımlı ve paydaşlarca bilinen atama, yükseltme ve görevlendirme kriterleri uygulanmakta ve karar almalarda kullanılmaktadır. [cite: 85]",
+                    "Kurumun atama, yükseltme ve görevlendirme uygulamalarının sonuçları izlenmekte ve değerlendirilerek önlemler alanmaktadır. [cite: 85]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 85]"
                 ],
                 checks: [
-                    "Öğretim kadrosu (uluslararası/ders saat ücretli dahil) atama, yükseltme ve görevlendirme süreçleri kamuoyuna açık mı?",
-                    "İlgili süreç ve kriterler akademik liyakati gözetip, fırsat eşitliğini sağlayacak nitelikte mi?",
-                    "Akademik kadronun uzmanlık alanı ile yürüttükleri ders arasında uyum sağlanıyor mu?",
-                    "Yarıyıl sonunda performansların (kurum kültürüne uyum dahil) değerlendirilmesi şeffaf ve etkin bir biçimde yapılıyor mu?",
-                    "Uygulamanın kriterlere uygunluğu şeffaf biçimde izlenip, gerekli düzeltici önlemler alınıyor mu?"
+                    "Öğretim kadrosu atama, yükseltme ve görevlendirme süreçleri kamuoyuna açık mı? [cite: 85]",
+                    "İlgili süreç ve kriterler akademik liyakati gözetip, fırsat eşitliğini sağlayacak nitelikte mi? [cite: 85]",
+                    "Akademik kadronun uzmanlık alanı ile yürüttükleri ders arasında uyum sağlanıyor mu? [cite: 85]",
+                    "Yarıyıl sonunda performansların değerlendirilmesi şeffaf ve etkin bir biçimde yapılıyor mu? [cite: 85]",
+                    "Uygulamanın kriterlere uygunluğu şeffaf biçimde izlenip gerekli önlemler alınıyor mu? [cite: 85]"
                 ]
             },
             {
                 id: "B.4.2", name: "Öğretim yetkinlikleri ve gelişimi", max: 5,
                 levels: [
-                    "Kurumda öğretim elemanlarının öğretim yetkinliğini geliştirmek üzere planlamalar bulunmamaktadır.",
-                    "Kurumun öğretim elemanlarının; öğrenci merkezli öğrenme, uzaktan eğitim, ölçme değerlendirme, materyal geliştirme vb. alanlardaki yetkinliklerinin geliştirilmesine ilişkin planlar bulunmaktadır.",
-                    "Kurumun genelinde öğretim elemanlarının öğretim yetkinliğini geliştirmek üzere uygulamalar vardır.",
-                    "Öğretim yetkinliğini geliştirme uygulamalarından elde edilen bulgular izlenmekte ve öğretim elemanları ile birlikte irdelenerek önlemler alınmaktadır.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Kurumda öğretim elemanlarının öğretim yetkinliğini geliştirmek üzere planlamalar bulunmamaktadır. [cite: 89]",
+                    "Kurumun öğretim elemanlarının; öğrenci merkezli öğrenme, uzaktan eğitim, ölçme değerlendirme, materyal geliştirme vb. alanlardaki yetkinliklerinin geliştirilmesine ilişkin planlar bulunmaktadır. [cite: 89]",
+                    "Kurumun genelinde öğretim elemanlarının öğretim yetkinliğini geliştirmek üzere uygulamalar vardır. [cite: 89]",
+                    "Öğretim yetkinliğini geliştirme uygulamalarından elde edilen bulgular izlenmekte ve öğretim elemanları ile birlikte irdelenerek önlemler alınmaktadır. [cite: 89]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 89]"
                 ],
                 checks: [
-                    "Öğretim yetkinliğini geliştirme süreçleri, önceden yapılan 'ihtiyaç analizleri' temelinde planlanıyor mu?",
-                    "Eğiticilerin eğitimi etkinlikleri (kurs, çalıştay, seminer vb.) yaygın ve düzenli biçimde yürütülüyor mu?",
-                    "Etkileşimli/aktif ders verme ve teknolojik yöntemleri öğretmek için 'Öğretme-Öğrenme Merkezi' (ÖYEM) vb. bir yapılanma mevcut mu?",
-                    "Öğretim elemanlarının pedagojik ve uzaktan eğitim (teknolojik) yeterliliklerindeki gelişim izleniyor mu?",
-                    "Eğitim-öğretim performansı izleme süreçleri, elemanlarla paylaşılarak iyileştirme amaçlı kullanılıyor mu?"
+                    "Öğretim yetkinliğini geliştirme süreçleri, önceden yapılan 'ihtiyaç analizleri' temelinde planlanıyor mu? [cite: 89]",
+                    "Eğiticilerin eğitimi etkinlikleri (kurs, çalıştay, seminer vb.) yaygın ve düzenli biçimde yürütülüyor mu? [cite: 89]",
+                    "Etkileşimli/aktif ders verme ve teknolojik yöntemleri öğretmek için 'Öğretme-Öğrenme Merkezi' vb. bir yapılanma mevcut mu? [cite: 89]",
+                    "Öğretim elemanlarının pedagojik ve uzaktan eğitim yeterliliklerindeki gelişim izleniyor mu? [cite: 89]",
+                    "Eğitim-öğretim performansı izleme süreçleri, elemanlarla paylaşılarak iyileştirme amaçlı kullanılıyor mu? [cite: 89]"
                 ]
             },
             {
                 id: "B.4.3", name: "Eğitim faaliyetlerine yönelik teşvik ve ödüllendirme", max: 5,
                 levels: [
-                    "Teşvik ve ödüllendirme mekanizmaları bulunmamaktadır.",
-                    "Teşvik ve ödüllendirme mekanizmalarının yetkinlik temelli, adil ve şeffaf biçimde oluşturulmasına yönelik planlar bulunmaktadır.",
-                    "Teşvik ve ödül uygulamaları kurum geneline yayılmıştır.",
-                    "Teşvik ve ödül uygulamaları izlenmekte ve iyileştirilmektedir.",
-                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır."
+                    "Teşvik ve ödüllendirme mekanizmaları bulunmamaktadır. [cite: 92]",
+                    "Teşvik ve ödüllendirme mekanizmalarının yetkinlik temelli, adil ve şeffaf biçimde oluşturulmasına yönelik planlar bulunmaktadır. [cite: 92]",
+                    "Teşvik ve ödül uygulamaları kurum geneline yayılmıştır. [cite: 92]",
+                    "Teşvik ve ödül uygulamaları izlenmekte ve iyileştirilmektedir. [cite: 92]",
+                    "İçselleştirilmiş, sistematik, sürdürülebilir ve örnek gösterilebilir uygulamalar bulunmaktadır. [cite: 92]"
                 ],
                 checks: [
-                    "Öğretim kadrosuna yönelik yaratıcı ve yenilikçi eğitim uygulamaları teşvik ediliyor mu?",
-                    "Eğitim kalitesindeki rekabeti artırmak üzere 'iyi eğitim ödülü' vb. takdir ve ödüllendirme süreçleri var mı?",
-                    "Atama ve yükseltme kriterlerinde 'yaratıcı eğitim faaliyetlerine' özel ve teşvik edici bir önem veriliyor mu?",
-                    "Ödüllendirme süreçleri yetkinlik temelli, şeffaf ve adil ilkelere dayanıyor mu?",
-                    "Teşvik ve ödüllendirme performansının sonuçları (kurum kalitesine etkisi) düzenli olarak izleniyor ve iyileştiriliyor mu?"
+                    "Öğretim kadrosuna yönelik yaratıcı ve yenilikçi eğitim uygulamaları teşvik ediliyor mu? [cite: 92]",
+                    "Eğitim kalitesindeki rekabeti artırmak üzere 'iyi eğitim ödülü' vb. takdir ve ödüllendirme süreçleri var mı? [cite: 92]",
+                    "Atama ve yükseltme kriterlerinde yaratıcı eğitim faaliyetlerine özel bir önem veriliyor mu? [cite: 92]",
+                    "Ödüllendirme süreçleri yetkinlik temelli, şeffaf ve adil ilkelere dayanıyor mu? [cite: 92]",
+                    "Teşvik ve ödüllendirme performansının sonuçları düzenli olarak izleniyor ve iyileştiriliyor mu? [cite: 92]"
                 ]
             }
         ]
@@ -523,6 +520,8 @@ const rubricData = [
 function init() {
     const main = document.getElementById('main-content');
     const summaryList = document.getElementById('summary-list');
+    main.innerHTML = '';
+    summaryList.innerHTML = '';
     
     rubricData.forEach((sec, sIdx) => {
         const secDiv = document.createElement('div');
@@ -613,6 +612,8 @@ function init() {
     `;
     main.appendChild(overall);
 
+    // Kapatılmadan önce ilk render'ın tamamlanması ve listelerin çekilmesi
+    calculateTotal();
     loadProjectList();
 }
 
@@ -712,17 +713,23 @@ function applySuggestion(cleanId) {
 
 function selectScore(cleanId, score) {
     const group = document.getElementById(`btn-group-${cleanId}`);
+    if(!group) return;
     group.querySelectorAll('.btn-score').forEach(b => b.className = 'btn-score');
     
     const clsObj = {5: 'lv5', 4: 'lv4', 3: 'lv3', 2: 'lv2', 1: 'lv1', 0: 'lv0'};
     const btn = document.getElementById(`btn-${cleanId}-${score}`);
-    btn.className = `btn-score active ${clsObj[score]}`;
-    document.getElementById(`val-${cleanId}`).value = score;
+    if(btn) btn.className = `btn-score active ${clsObj[score]}`;
+    
+    const valInput = document.getElementById(`val-${cleanId}`);
+    if(valInput) valInput.value = score;
     
     const table = document.getElementById(`rubric-${cleanId}`);
-    table.querySelectorAll('td').forEach(td => td.classList.remove('selected-level'));
-    if(score > 0) {
-        document.getElementById(`cell-${cleanId}-${score}`).classList.add('selected-level');
+    if(table) {
+        table.querySelectorAll('td').forEach(td => td.classList.remove('selected-level'));
+        const cell = document.getElementById(`cell-${cleanId}-${score}`);
+        if(score > 0 && cell) {
+            cell.classList.add('selected-level');
+        }
     }
 
     calculateTotal();
@@ -734,23 +741,31 @@ function calculateTotal() {
         let secTotal = 0;
         sec.items.forEach(item => {
             let valId = item.id.replace(/\./g, '-');
-            secTotal += parseInt(document.getElementById(`val-${valId}`).value) || 0;
+            const valEl = document.getElementById(`val-${valId}`);
+            secTotal += valEl ? (parseInt(valEl.value) || 0) : 0;
         });
 
-        document.getElementById(`sec-total-${sIdx}`).innerText = `${secTotal} / ${sec.max}`;
+        const secEl = document.getElementById(`sec-total-${sIdx}`);
+        if(secEl) secEl.innerText = `${secTotal} / ${sec.max}`;
+        
         let sumText = document.getElementById(`sum-${sIdx}`);
-        sumText.innerText = `${secTotal} / ${sec.max}`;
-        sumText.style.color = secTotal >= sec.threshold ? '#4ade80' : '#f87171';
+        if(sumText) {
+            sumText.innerText = `${secTotal} / ${sec.max}`;
+            sumText.style.color = secTotal >= sec.threshold ? '#4ade80' : '#f87171';
+        }
         
         grand += secTotal;
     });
 
-    document.getElementById('grand-total').innerText = grand;
-    const badge = document.getElementById('status-badge');
+    const grandEl = document.getElementById('grand-total');
+    if(grandEl) grandEl.innerText = grand;
     
-    if(grand >= 75) { badge.innerText = "YÜKSEK KALİTE STANDARDI"; badge.style.background = "var(--success)"; }
-    else if(grand >= 45) { badge.innerText = "YETERLİ / İZLENMELİ"; badge.style.background = "var(--warning)"; }
-    else { badge.innerText = "CİDDİ İYİLEŞTİRME GEREKİYOR"; badge.style.background = "var(--danger)"; }
+    const badge = document.getElementById('status-badge');
+    if(badge) {
+        if(grand >= 75) { badge.innerText = "YÜKSEK KALİTE STANDARDI"; badge.style.background = "var(--success)"; }
+        else if(grand >= 45) { badge.innerText = "YETERLİ / İZLENMELİ"; badge.style.background = "var(--warning)"; }
+        else { badge.innerText = "CİDDİ İYİLEŞTİRME GEREKİYOR"; badge.style.background = "var(--danger)"; }
+    }
 }
 
 // --- VERİTABANI İŞLEMLERİ (FETCH API) ---
@@ -763,7 +778,7 @@ function saveData() {
         return;
     }
 
-    if (!GOOGLE_APP_URL || GOOGLE_APP_URL === "BURAYA_KENDİ_WEB_APP_URL_Nİ_YAPIŞTIR") {
+    if (!GOOGLE_APP_URL || GOOGLE_APP_URL.includes("BURAYA_KENDİ_WEB_APP_URL_Nİ_YAPIŞTIR")) {
         alert("Lütfen HTML içindeki GOOGLE_APP_URL kısmına kendi Apps Script Web App linkinizi yapıştırın!");
         return;
     }
@@ -787,9 +802,11 @@ function saveData() {
     rubricData.forEach((sec) => {
         sec.items.forEach(item => {
             let cleanId = item.id.replace(/\./g, '-');
+            const valEl = document.getElementById(`val-${cleanId}`);
+            const commEl = document.getElementById(`comment-${cleanId}`);
             payload.details[item.id] = {
-                score: parseInt(document.getElementById(`val-${cleanId}`).value) || 0,
-                comment: document.getElementById(`comment-${cleanId}`).value
+                score: valEl ? (parseInt(valEl.value) || 0) : 0,
+                comment: commEl ? commEl.value : ""
             };
         });
     });
@@ -816,7 +833,7 @@ function saveData() {
 }
 
 function loadProjectList() {
-    if (!GOOGLE_APP_URL || GOOGLE_APP_URL === "BURAYA_KENDİ_WEB_APP_URL_Nİ_YAPIŞTIR") return;
+    if (!GOOGLE_APP_URL || GOOGLE_APP_URL.includes("BURAYA_KENDİ_WEB_APP_URL_Nİ_YAPIŞTIR")) return;
 
     fetch(GOOGLE_APP_URL + "?action=getList")
     .then(res => res.json())
@@ -874,7 +891,6 @@ function loadProjectData(projNo) {
             document.getElementById('overall-strengths').value = data.overall.strengths || "";
             document.getElementById('overall-weaknesses').value = data.overall.weaknesses || "";
 
-            // Formdaki tüm işaretleri temizle
             document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             document.querySelectorAll('.suggestion-box').forEach(b => { b.classList.remove('active'); b.dataset.suggested = "0"; });
             document.querySelectorAll('.sugg-value').forEach(v => v.innerText = "-");
@@ -936,13 +952,16 @@ function exportPDF() {
             </div>`;
     
     rubricData.forEach((section, sIdx) => {
+        const sumEl = document.getElementById(`sum-${sIdx}`);
         reportHTML += `<div class="pdf-section">
-            <div class="pdf-section-title">${section.title} (Puan: ${document.getElementById(`sum-${sIdx}`).innerText})</div>`;
+            <div class="pdf-section-title">${section.title} (Puan: ${sumEl ? sumEl.innerText : "0 / " + section.max})</div>`;
         
         section.items.forEach(item => {
             const cleanId = item.id.replace(/\./g, '-');
-            const score = parseInt(document.getElementById(`val-${cleanId}`).value) || 0;
-            const comment = document.getElementById(`comment-${cleanId}`).value || 'Bu kriter için değerlendirme notu girilmemiştir.';
+            const valEl = document.getElementById(`val-${cleanId}`);
+            const commEl = document.getElementById(`comment-${cleanId}`);
+            const score = valEl ? (parseInt(valEl.value) || 0) : 0;
+            const comment = commEl ? (commEl.value || 'Bu kriter için değerlendirme notu girilmemiştir.') : 'Bu kriter için değerlendirme notu girilmemiştir.';
             
             reportHTML += `<div class="pdf-item">
                 <div class="pdf-item-header">
