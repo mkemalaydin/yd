@@ -79,7 +79,7 @@
         .suggestion-box.active .btn-apply-sugg { opacity: 1; pointer-events: auto; }
         .suggestion-box.active .btn-apply-sugg:hover { background: #0369a1; transform: translateY(-1px); }
 
-        /* Main Score Buttons (Removed 0 option) */
+        /* Main Score Buttons */
         .score-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .btn-score { flex: 1; height: 45px; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; font-weight: 800; cursor: pointer; transition: all 0.2s; font-size: 1.1rem; color: #475569; }
         .btn-score:hover { border-color: var(--accent); color: var(--accent); background: #f0f9ff; }
@@ -104,12 +104,7 @@
         /* Dynamic Evidence Box */
         .evidence-box { background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 8px; padding: 15px; margin-top: 15px; transition: all 0.3s ease; }
         .evidence-box label { font-size: 0.9rem; font-weight: 600; color: var(--primary); display: block; margin-bottom: 8px; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
-        
         .preview-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
-        .img-wrapper { position: relative; width: 80px; height: 60px; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 2px solid var(--border); cursor: zoom-in; transition: 0.2s; }
-        .img-wrapper img:hover { border-color: var(--accent); }
-        .btn-remove-img { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         #image-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 2000; justify-content: center; align-items: center; padding: 40px; }
         #image-modal img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
@@ -602,8 +597,12 @@ function init() {
                     <textarea class="comment-area" id="comment-${cleanId}" placeholder="Değerlendirme gerekçenizi ve komisyon notlarınızı buraya yazınız..."></textarea>
                     
                     <div class="evidence-box" id="evidence-box-${cleanId}">
-                        <label id="evidence-label-${cleanId}">Kanıt Dosyası / Ekran Görüntüsü Yükle:</label>
-                        <input type="file" multiple accept="image/*" onchange="handleMultipleImageUpload(this, '${cleanId}')">
+                        <label id="evidence-label-${cleanId}">Kanıt Dosyası (PDF/Görsel) veya URL Ekle:</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="url-input-${cleanId}" placeholder="https://..." style="flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; outline: none;">
+                            <button type="button" onclick="addEvidenceLink('${cleanId}')" style="background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">URL Ekle</button>
+                        </div>
+                        <input type="file" multiple accept="image/*,application/pdf" onchange="handleFileUpload(this, '${cleanId}')">
                         <div class="preview-container" id="preview-container-${cleanId}"></div>
                     </div>
 
@@ -639,34 +638,59 @@ function init() {
     loadProjectList();
 }
 
-function handleMultipleImageUpload(input, cleanId) {
+// Görsel ve PDF Yükleme Yönetimi (Base64)
+function handleFileUpload(input, cleanId) {
     if (!currentNewImages[cleanId]) currentNewImages[cleanId] = [];
 
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 500;
-                let width = img.width;
-                let height = img.height;
+            if (file.type.includes('image')) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
 
-                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
-                currentNewImages[cleanId].push(dataUrl);
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
+                    currentNewImages[cleanId].push(dataUrl);
+                    renderPreviews(cleanId);
+                }
+                img.src = e.target.result;
+            } else if (file.type.includes('pdf')) {
+                // PDF dosyasını doğrudan base64 olarak alıyoruz
+                currentNewImages[cleanId].push(e.target.result);
                 renderPreviews(cleanId);
             }
-            img.src = e.target.result;
         }
         reader.readAsDataURL(file);
     });
 }
 
+// URL Ekleme Yönetimi
+function addEvidenceLink(cleanId) {
+    const input = document.getElementById(`url-input-${cleanId}`);
+    let url = input.value.trim();
+    
+    if (!url) return;
+    
+    if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+    }
+
+    if (!currentNewImages[cleanId]) currentNewImages[cleanId] = [];
+    currentNewImages[cleanId].push(url);
+    input.value = ''; 
+    renderPreviews(cleanId);
+}
+
+// Önizlemeleri Görüntüleme (Resim, PDF, URL Kontrolüyle)
 function renderPreviews(cleanId) {
     const container = document.getElementById(`preview-container-${cleanId}`);
     container.innerHTML = '';
@@ -674,10 +698,33 @@ function renderPreviews(cleanId) {
     if (currentNewImages[cleanId]) {
         currentNewImages[cleanId].forEach((src, idx) => {
             const wrap = document.createElement('div');
-            wrap.className = 'img-wrapper';
+            // CSS çakışmasını engellemek için img-wrapper class'ı yerine inline style kullanıyoruz
+            wrap.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; width: 100%; box-sizing: border-box;";
+            
+            let isImage = src.startsWith('data:image') || /\.(jpeg|jpg|gif|png|webp|bmp)(\?.*)?$/i.test(src);
+            let isPdf = src.startsWith('data:application/pdf') || /\.pdf(\?.*)?$/i.test(src);
+            
+            let displayHtml = '';
+            if (isImage) {
+                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                                   <img src="${src}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ccc; cursor:pointer;" onclick="openModal('${src}')" title="Görüntülemek için tıkla">
+                                   <span style="color: var(--accent); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 150px;">Görsel Eklendi</span>
+                               </div>`;
+            } else if (isPdf) {
+                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                                   <span style="font-size:24px;">📄</span>
+                                   <a href="${src}" target="_blank" download="kanit_belgesi.pdf" style="color: var(--accent); text-decoration: none; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;" title="PDF İndir/Aç">PDF Belgesi Eklendi</a>
+                               </div>`;
+            } else {
+                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                                   <span style="font-size:24px;">🔗</span>
+                                   <a href="${src}" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;" title="${src}">${src}</a>
+                               </div>`;
+            }
+
             wrap.innerHTML = `
-                <img src="${src}" onclick="openModal('${src}')">
-                <button type="button" class="btn-remove-img" onclick="removeNewImage('${cleanId}', ${idx})">X</button>
+                ${displayHtml}
+                <button type="button" onclick="removeNewImage('${cleanId}', ${idx})" style="background: var(--danger); color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold; font-size: 0.75rem; flex-shrink:0;">SİL</button>
             `;
             container.appendChild(wrap);
         });
@@ -766,12 +813,12 @@ function selectScore(cleanId, score) {
         if(score > 0) {
             evBox.style.borderColor = colors[score].border;
             evBox.style.backgroundColor = colors[score].bg;
-            evLabel.innerHTML = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; background:${colors[score].border}; color:white;">Seviye ${score}</span> &nbsp;Bu Puana Ait Kanıt Yükle:`;
+            evLabel.innerHTML = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; background:${colors[score].border}; color:white;">Seviye ${score}</span> &nbsp;Bu Puana Ait Kanıt (PDF/Görsel/URL) Ekle:`;
             evLabel.style.color = colors[score].text;
         } else {
             evBox.style.borderColor = '#94a3b8';
             evBox.style.backgroundColor = '#f8fafc';
-            evLabel.innerHTML = `Kanıt Dosyası / Ekran Görüntüsü Yükle:`;
+            evLabel.innerHTML = `Kanıt Dosyası (PDF/Görsel) veya URL Ekle:`;
             evLabel.style.color = 'var(--primary)';
         }
     }
@@ -879,7 +926,7 @@ function saveData() {
             alert(res.message);
             loadProjectList(); 
         } else {
-            alert("Veritabanı Hatası (Görseller çok büyük olabilir): " + res.message);
+            alert("Veritabanı Hatası: " + res.message);
         }
     })
     .catch(err => {
@@ -926,7 +973,7 @@ function handleProjectSelection() {
             b.style.backgroundColor = '#f8fafc';
             b.style.borderColor = '#94a3b8';
             let lbl = b.querySelector('label');
-            if(lbl) { lbl.innerHTML = 'Kanıt Dosyası / Ekran Görüntüsü Yükle:'; lbl.style.color = 'var(--primary)'; }
+            if(lbl) { lbl.innerHTML = 'Kanıt Dosyası (PDF/Görsel) veya URL Ekle:'; lbl.style.color = 'var(--primary)'; }
         });
         
         currentNewImages = {};
