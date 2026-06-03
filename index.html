@@ -51,6 +51,7 @@
         .nav-panel select:focus, .nav-panel input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
 
         .layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; align-items: start; }
+        main { min-width: 0; } /* YENİ: Sağ menünün ekrandan taşmasını engeller */
         
         .section-card { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .section-header { border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
@@ -98,17 +99,17 @@
         .rubric-table td.selected-level { background-color: #f0fdf4; border-color: #bbf7d0; color: #166534; box-shadow: inset 0 0 0 2px #22c55e; }
         .rubric-table td.selected-level b { background-color: #dcfce7; color: #166534; border-color: #86efac; }
 
-        /* Zengin Metin (Rich Text) Editörü Stilleri */
+        /* Zengin Metin (Rich Text) Editörü Stilleri - YENİLENDİ */
         .rte-container { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 15px; background: white; transition: 0.2s; }
         .rte-container:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
         .rte-toolbar { background: #f8fafc; padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
         .rte-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; color: #475569; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
         .rte-btn:hover { background: #f1f5f9; color: var(--accent); border-color: var(--accent); }
-        .comment-area { width: 100%; box-sizing: border-box; padding: 15px; min-height: 120px; font-family: inherit; font-size: 0.9rem; line-height: 1.6; background: white; overflow-y: auto; cursor: text; white-space: pre-wrap; word-wrap: break-word; outline: none; border: none; }
+        
+        .comment-area { width: 100%; box-sizing: border-box; padding: 15px; min-height: 120px; font-family: inherit; font-size: 0.9rem; line-height: 1.6; background: white; overflow-y: auto; overflow-x: hidden; cursor: text; white-space: pre-wrap; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; outline: none; border: none; }
         .comment-area:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; display: block; }
-        .comment-area a { color: #0284c7 !important; text-decoration: underline !important; font-weight: 600; cursor: pointer; }
-        .comment-area *:not(a) { color: inherit !important; }
-        .comment-area * { max-width: 100%; font-size: inherit !important; font-family: inherit !important; background: transparent !important; margin-top: 0; }
+        .comment-area a { color: #0284c7 !important; text-decoration: underline !important; font-weight: 600; cursor: pointer; word-break: break-all; }
+        .comment-area * { max-width: 100%; font-size: inherit !important; font-family: inherit !important; background: transparent !important; margin-top: 0; white-space: pre-wrap !important; overflow-wrap: break-word !important; word-break: break-word !important; }
 
         /* Dynamic Evidence Box */
         .evidence-box { background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 8px; padding: 15px; margin-top: 15px; transition: all 0.3s ease; }
@@ -422,17 +423,15 @@ const rubricData = [
     }
 ];
 
-// YENİ: Zengin Metin Link Ekleme Fonksiyonu
 function addLinkToSelection() {
     const url = prompt("Seçili metne eklenecek bağlantıyı (URL) girin:\nÖrn: https://huzem.hitit.edu.tr/belge", "https://");
     if (url && url !== "https://") {
         document.execCommand('createLink', false, url);
         
-        // Eklenen son linki bulup yeni sekmede açılma (target="_blank") özelliği ekle
         const selection = window.getSelection();
         if (selection.focusNode && selection.focusNode.parentNode.tagName === 'A') {
             selection.focusNode.parentNode.setAttribute('target', '_blank');
-            selection.focusNode.parentNode.setAttribute('rel', 'noopener noreferrer'); // Güvenlik standardı
+            selection.focusNode.parentNode.setAttribute('rel', 'noopener noreferrer');
         }
     }
 }
@@ -852,9 +851,19 @@ function saveData() {
         });
     });
 
+    // VERİ BOYUTU KONTROLÜ (50.000 Karakter Limiti)
+    let payloadString = JSON.stringify(payload);
+    
+    // Güvenlik payı bırakarak limiti 48.000 karakter olarak belirliyoruz
+    if (payloadString.length > 48000) {
+        document.getElementById('loader').style.display = "none";
+        alert("⚠️ HATA: Göndermeye çalıştığınız veri çok büyük!\n\nGoogle Sheets veritabanı tek seferde en fazla 50.000 karakter kaydedebilir. Yüklediğiniz PDF'ler, görseller veya arka planında çöp kod barındıran yapıştırılmış metinler bu limiti aşıyor.\n\nÇÖZÜM: Lütfen metinlerinizi kontrol edin ve büyük dosyalarınızı doğrudan yüklemek yerine 'URL Ekle' butonuyla kurum sürücü bağlantısı olarak ekleyin.");
+        return; 
+    }
+
     fetch(GOOGLE_APP_URL, {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: payloadString,
         headers: { "Content-Type": "text/plain;charset=utf-8" } 
     })
     .then(r => r.json())
@@ -869,7 +878,7 @@ function saveData() {
     })
     .catch(err => {
         document.getElementById('loader').style.display = "none";
-        alert("Ağ Hatası: Sunucuya ulaşılamadı. CORS hatası olabilir veya internet bağlantınızı kontrol edin.");
+        alert("Ağ Hatası: Sunucuya ulaşılamadı. Ya veri kapasiteniz aşıldı ya da internet bağlantınızda sorun var.");
     });
 }
 
@@ -1085,7 +1094,12 @@ function exportPDF() {
     });
 }
 
-// ZENGİN METİN EDİTÖRÜ (RICH TEXT) GELİŞMİŞ LİNK YÖNETİMİ
+// ===================================================================
+// YENİ: AKILLI YAPIŞTIRMA FİLTRESİ (SANITIZER)
+// Kopyalanan metinlerin görünmez kodlarını siler, sadece linkleri korur
+// ===================================================================
+
+// 1. Tıklama Yakalayıcı (Linkleri yeni sekmede açar)
 document.addEventListener('click', function(e) {
     const link = e.target.closest('a'); 
     if (link && e.target.closest('.comment-area')) {
@@ -1094,19 +1108,65 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// 2. Yapıştırma Yakalayıcı (Metinleri ve linkleri temizler)
 document.addEventListener('paste', function(e) {
     const commentArea = e.target.closest('.comment-area');
-    if (commentArea) {
-        setTimeout(() => {
-            const links = commentArea.querySelectorAll('a');
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer'); 
-                link.style.color = '#0284c7'; 
-                link.style.textDecoration = 'underline';
-                link.style.fontWeight = '600';
-            });
-        }, 10);
+    if (!commentArea) return;
+
+    // Tarayıcının varsayılan yapıştırma işlemini durdur
+    e.preventDefault();
+    
+    // Kopyalanan veriyi HTML formatında almayı dene
+    let pasteHtml = (e.clipboardData || window.clipboardData).getData('text/html');
+    
+    if (pasteHtml) {
+        // Sanal bir kutu oluştur ve kopyalanan HTML'i içine at
+        const temp = document.createElement('div');
+        temp.innerHTML = pasteHtml;
+
+        // A. Tehlikeli veya çok yer kaplayan tüm etiketleri tamamen sil (resimler, tablolar vs.)
+        const badTags = temp.querySelectorAll('script, style, img, iframe, object, embed, picture, svg, canvas, table, tr, td, th, tbody, thead, tfoot');
+        badTags.forEach(tag => tag.remove());
+
+        // B. Tüm linkleri (A etiketlerini) bul, temizle ve yeni sekme ayarlarını yap
+        const links = temp.querySelectorAll('a');
+        links.forEach(link => {
+            const href = link.href;
+            const text = link.textContent;
+            
+            // Linkin içindeki spagetti kodları temizle (örneğin eski fontlar)
+            while(link.attributes.length > 0) {
+                link.removeAttribute(link.attributes[0].name);
+            }
+            
+            // Sadece bizim istediğimiz temiz ayarları ekle
+            link.href = href;
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+            link.style.color = '#0284c7';
+            link.style.textDecoration = 'underline';
+            link.style.fontWeight = '600';
+            link.textContent = text; 
+        });
+
+        // C. Metin kutusundaki link HARIÇ diğer tüm etiketlerin (p, div, span vs) gizli CSS stillerini sil
+        const allElements = temp.querySelectorAll('*');
+        allElements.forEach(el => {
+            if (el.tagName !== 'A') { 
+                el.removeAttribute('style');
+                el.removeAttribute('class');
+                el.removeAttribute('id');
+                el.removeAttribute('dir');
+                el.removeAttribute('align');
+            }
+        });
+
+        // Tertemiz ve güvenli hale getirilmiş içeriği editörün içine yapıştır
+        document.execCommand('insertHTML', false, temp.innerHTML);
+    } else {
+        // Eğer kopyalanan şey zaten düz metinse direkt yapıştır
+        let plainText = (e.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, plainText);
     }
 });
 
