@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalite Güvence Değerlendirme Sistemi | Eğitim ve Öğretim</title>
@@ -198,7 +199,7 @@
 // ==========================================
 // KENDİ WEB APP URL'Nİ BURAYA YAPIŞTIR
 // ==========================================
-const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycby9rV48-FqvSjFPw-unCxIykGczhZcgtZOY_sxQt1Tq-0VPzO236Md3rId-ZclTFHkJVQ/exec"; 
+const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyKwirVPrMPbmEPvAwuNCxwS2wPm4GiGaUN2EnuEaB5fw1bAANye4KWpv7yGIS1mbxGTQ/exec"; 
 
 let currentNewImages = {}; 
 
@@ -441,6 +442,10 @@ function init() {
     const summaryList = document.getElementById('summary-list');
     main.innerHTML = '';
     summaryList.innerHTML = '';
+
+    if (window.location.protocol === 'file:') {
+        alert('UYARI: Bu sayfayı doğrudan dosyadan (file://) açtığınız için uzak Google Apps Script sunucusuna erişim sorunları yaşayabilirsiniz. Lütfen mümkünse sayfayı yerel bir HTTP sunucusu üzerinden açın (örneğin Live Server veya python -m http.server).');
+    }
     
     rubricData.forEach((sec, sIdx) => {
         const secDiv = document.createElement('div');
@@ -824,9 +829,9 @@ function saveData() {
         grandTotal: document.getElementById('grand-total').innerText,
         status: document.getElementById('status-badge').innerText,
         overall: {
-            summary: sanitizeCommentHTML(document.getElementById('overall-summary').innerHTML),
-            strengths: sanitizeCommentHTML(document.getElementById('overall-strengths').innerHTML),
-            weaknesses: sanitizeCommentHTML(document.getElementById('overall-weaknesses').innerHTML)
+            summary: compressIfUseful(sanitizeCommentHTML(document.getElementById('overall-summary').innerHTML)),
+            strengths: compressIfUseful(sanitizeCommentHTML(document.getElementById('overall-strengths').innerHTML)),
+            weaknesses: compressIfUseful(sanitizeCommentHTML(document.getElementById('overall-weaknesses').innerHTML))
         },
         details: {}
     };
@@ -839,7 +844,7 @@ function saveData() {
             
             payload.details[item.id] = {
                 score: valEl ? (parseInt(valEl.value) || 0) : 0,
-                comment: commEl ? sanitizeCommentHTML(commEl.innerHTML) : "",
+                comment: commEl ? compressIfUseful(sanitizeCommentHTML(commEl.innerHTML)) : "",
                 checks: [],
                 imageUrls: currentNewImages[cleanId] || []
             };
@@ -851,41 +856,84 @@ function saveData() {
         });
     });
 
-    // VERİ BOYUTU KONTROLÜ (50.000 Karakter Limiti)
     let payloadString = JSON.stringify(payload);
-    
-    // Güvenlik payı bırakarak limiti 48.000 karakter olarak belirliyoruz
-    if (payloadString.length > 48000) {
-        document.getElementById('loader').style.display = "none";
-        alert("⚠️ HATA: Göndermeye çalıştığınız veri çok büyük!\n\nGoogle Sheets veritabanı tek seferde en fazla 50.000 karakter kaydedebilir. Yüklediğiniz PDF'ler, görseller veya arka planında çöp kod barındıran yapıştırılmış metinler bu limiti aşıyor.\n\nÇÖZÜM: Lütfen metinlerinizi kontrol edin ve büyük dosyalarınızı doğrudan yüklemek yerine 'URL Ekle' butonuyla kurum sürücü bağlantısı olarak ekleyin.");
-        return; 
+
+    // Google Sheets hücre başına maksimum 50.000 karakterdir.
+    const oversizedFields = [];
+    const checkField = (key, value) => {
+        const length = String(value || '').length;
+        if (length > 50000) oversizedFields.push({ key, length });
+    };
+
+    checkField('projectNumber', payload.projectNumber);
+    checkField('projectName', payload.projectName);
+    checkField('overall.summary', payload.overall.summary);
+    checkField('overall.strengths', payload.overall.strengths);
+    checkField('overall.weaknesses', payload.overall.weaknesses);
+
+    Object.keys(payload.details).forEach(id => {
+        const entry = payload.details[id];
+        checkField(`${id}.comment`, entry.comment);
+        if (entry.imageUrls && Array.isArray(entry.imageUrls)) {
+            entry.imageUrls.forEach((url, idx) => checkField(`${id}.imageUrls[${idx}]`, url));
+        }
+    });
+
+    if (oversizedFields.length > 0) {
+        document.getElementById('loader').style.display = 'none';
+        const largest = oversizedFields.sort((a, b) => b.length - a.length).slice(0, 4);
+        const details = largest.map(item => `• ${item.key}: ${item.length} karakter`).join('\n');
+        alert(`⚠️ HATA: Kaydetmek istediğiniz verinin bazı alanları Google Sheets hücre sınırını aşıyor!\n\nEn büyük alanlar:\n${details}\n\nGoogle Sheets her hücre için maksimum 50.000 karakter destekler. Lütfen uzun yorumları birkaç küçük paragrafa bölerek kaydetmeyi deneyin.`);
+        return;
     }
 
     fetch(GOOGLE_APP_URL, {
         method: 'POST',
-        body: payloadString,
-        headers: { "Content-Type": "text/plain;charset=utf-8" } 
+        mode: 'cors',
+        headers: {
+            'Accept': 'application/json'
+        },
+        body: payloadString
     })
-    .then(r => r.json())
-    .then(res => {
+    .then(response => {
         document.getElementById('loader').style.display = "none";
-        if(res.status === 'success') {
+        if (response.type === 'opaque') {
+            alert("Veri sunucuya gönderildi. CORS kısıtlaması nedeniyle sunucudan gelen yanıt okunamadı. Sunucudaki kaydı kontrol edin.");
+            return;
+        }
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Sunucu hatası ${response.status}: ${text || response.statusText}`);
+            });
+        }
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (parseErr) {
+                throw new Error(`Beklenmeyen yanıt formatı: ${text}`);
+            }
+        });
+    })
+    .then(res => {
+        if (!res) return;
+        if (res.status === 'success') {
             alert(res.message);
-            loadProjectList(); 
+            loadProjectList();
         } else {
-            alert("Veritabanı Hatası: " + res.message);
+            alert("Veritabanı Hatası: " + (res.message || JSON.stringify(res)));
         }
     })
     .catch(err => {
         document.getElementById('loader').style.display = "none";
-        alert("Ağ Hatası: Sunucuya ulaşılamadı. Ya veri kapasiteniz aşıldı ya da internet bağlantınızda sorun var.");
+        console.error('Kayıt hatası:', err);
+        alert("Ağ Hatası: Sunucuya ulaşılamadı veya beklenmeyen yanıt alındı.\n\nDetay: " + err.message);
     });
 }
 
 function loadProjectList() {
     if (!GOOGLE_APP_URL || GOOGLE_APP_URL.includes("BURAYA_KENDİ_WEB_APP_URL_Nİ_YAPIŞTIR")) return;
 
-    fetch(GOOGLE_APP_URL + "?action=getList")
+    fetch(GOOGLE_APP_URL + "?action=getList", { mode: 'cors', cache: 'no-cache', credentials: 'omit' })
     .then(res => res.json())
     .then(list => {
         const sel = document.getElementById('project-selector');
@@ -936,7 +984,7 @@ function loadProjectData(projNo) {
     document.getElementById('loader-text').innerText = "Kayıt Veritabanından Yükleniyor...";
     document.getElementById('loader').style.display = "flex";
 
-    fetch(`${GOOGLE_APP_URL}?action=load&projNo=${encodeURIComponent(projNo)}`)
+    fetch(`${GOOGLE_APP_URL}?action=load&projNo=${encodeURIComponent(projNo)}`, { mode: 'cors', cache: 'no-cache', credentials: 'omit' })
     .then(res => res.json())
     .then(res => {
         document.getElementById('loader').style.display = "none";
@@ -944,9 +992,9 @@ function loadProjectData(projNo) {
             const data = res.data;
             document.getElementById('proj-no').value = data.projectNumber;
             document.getElementById('proj-name').value = data.projectName;
-            document.getElementById('overall-summary').innerHTML = data.overall.summary || "";
-            document.getElementById('overall-strengths').innerHTML = data.overall.strengths || "";
-            document.getElementById('overall-weaknesses').innerHTML = data.overall.weaknesses || "";
+            document.getElementById('overall-summary').innerHTML = sanitizeCommentHTML(decompressIfNeeded(data.overall.summary || ""));
+            document.getElementById('overall-strengths').innerHTML = sanitizeCommentHTML(decompressIfNeeded(data.overall.strengths || ""));
+            document.getElementById('overall-weaknesses').innerHTML = sanitizeCommentHTML(decompressIfNeeded(data.overall.weaknesses || ""));
 
             document.querySelectorAll('.likert-group input[type="radio"]').forEach(r => r.checked = false);
             document.querySelectorAll('.suggestion-box').forEach(b => { b.classList.remove('active'); b.dataset.suggested = "0"; });
@@ -961,7 +1009,7 @@ function loadProjectData(projNo) {
                     let det = data.details[id];
 
                     let commentBox = document.getElementById(`comment-${cleanId}`);
-                    if(commentBox) commentBox.innerHTML = det.comment || "";
+                    if(commentBox) commentBox.innerHTML = sanitizeCommentHTML(decompressIfNeeded(det.comment || ""));
                     
                     if(det.checks) {
                         det.checks.forEach((val, cIdx) => {
@@ -1108,15 +1156,107 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function compressToBase64(input) {
+    if (input == null || input === '') return '';
+    const inputStr = String(input);
+    const compressed = lzw_encode(inputStr);
+    return btoa(compressed);
+}
+
+function decompressFromBase64(input) {
+    if (input == null || input === '') return '';
+    try {
+        const decoded = atob(input);
+        return lzw_decode(decoded);
+    } catch (e) {
+        return '';
+    }
+}
+
+function lzw_encode(str) {
+    const dict = {};
+    const data = (str || '').split('');
+    let phrase = data[0] || '';
+    const out = [];
+    let code = 256;
+
+    for (let i = 1; i < data.length; i++) {
+        const curr = data[i];
+        const phraseCurr = phrase + curr;
+        if (dict[phraseCurr] != null) {
+            phrase = phraseCurr;
+        } else {
+            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+            dict[phraseCurr] = code++;
+            phrase = curr;
+        }
+    }
+
+    if (phrase !== '') {
+        out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+    }
+
+    let result = '';
+    for (let i = 0; i < out.length; i++) {
+        result += String.fromCharCode((out[i] >> 8) & 0xff, out[i] & 0xff);
+    }
+    return result;
+}
+
+function lzw_decode(str) {
+    const data = [];
+    for (let i = 0; i < str.length; i += 2) {
+        data.push((str.charCodeAt(i) << 8) | str.charCodeAt(i + 1));
+    }
+
+    const dict = [];
+    let curr = String.fromCharCode(data[0]);
+    let old = curr;
+    const out = [curr];
+    let code = 256;
+
+    for (let i = 1; i < data.length; i++) {
+        const currCode = data[i];
+        let phrase;
+        if (currCode < 256) {
+            phrase = String.fromCharCode(currCode);
+        } else {
+            phrase = dict[currCode] ? dict[currCode] : old + old.charAt(0);
+        }
+        out.push(phrase);
+        dict[code++] = old + phrase.charAt(0);
+        old = phrase;
+    }
+
+    return out.join('');
+}
+
+function compressIfUseful(text) {
+    const sanitized = String(text || '');
+    if (!sanitized) return '';
+    const compressed = '#LZ#' + compressToBase64(sanitized);
+    return compressed.length < sanitized.length ? compressed : sanitized;
+}
+
+function decompressIfNeeded(text) {
+    const value = String(text || '');
+    if (value.startsWith('#LZ#')) {
+        return decompressFromBase64(value.slice(4)) || '';
+    }
+    return value;
+}
+
 function sanitizeCommentHTML(html) {
     const temp = document.createElement('div');
     temp.innerHTML = html || '';
 
-    const badTags = new Set(['script', 'style', 'img', 'iframe', 'object', 'embed', 'picture', 'svg', 'canvas', 'table', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'video', 'audio', 'form', 'input', 'button']);
+    const badTags = new Set(['script', 'style', 'img', 'iframe', 'object', 'embed', 'picture', 'svg', 'canvas', 'table', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'video', 'audio', 'form', 'input', 'button', 'select', 'textarea', 'label', 'option']);
 
     function sanitizeNode(node) {
         if (node.nodeType === Node.TEXT_NODE) {
-            return node.nodeValue.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+            return escapeHtml(node.nodeValue || '')
+                .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+                .replace(/\u00A0/g, ' ');
         }
 
         if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -1130,28 +1270,16 @@ function sanitizeCommentHTML(html) {
 
         if (tag === 'a') {
             const href = (node.getAttribute('href') || '').trim();
-            const safeHref = href.replace(/[\u0000-\u001F\u007F]+/g, '');
+            const safeHref = href.replace(/[\u0000-\u001F\u007F]+/g, '').replace(/\s+/g, ' ');
             if (!/^https?:\/\//i.test(safeHref) && !/^mailto:/i.test(safeHref)) {
                 return sanitizeChildren(node);
             }
-            const text = sanitizeChildren(node) || escapeHtml(safeHref);
+            const text = sanitizeChildren(node).trim() || escapeHtml(safeHref);
             return `<a href="${escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
         }
 
         if (tag === 'br') {
             return '<br>';
-        }
-
-        if (tag === 'p' || tag === 'div') {
-            const content = sanitizeChildren(node).trim();
-            return content ? `<p>${content}</p>` : '';
-        }
-
-        if (tag === 'b' || tag === 'strong') {
-            return `<strong>${sanitizeChildren(node)}</strong>`;
-        }
-        if (tag === 'i' || tag === 'em') {
-            return `<em>${sanitizeChildren(node)}</em>`;
         }
 
         return sanitizeChildren(node);
@@ -1161,7 +1289,14 @@ function sanitizeCommentHTML(html) {
         return Array.from(parent.childNodes).map(sanitizeNode).join('');
     }
 
-    return sanitizeChildren(temp).replace(/\s{2,}/g, ' ').trim();
+    let cleaned = sanitizeChildren(temp)
+        .replace(/\s{2,}/g, ' ')
+        .replace(/((&nbsp;)|\u00A0)/g, ' ')
+        .replace(/(<br>\s*){2,}/g, '<br>')
+        .replace(/^(<br>)+|(<br>)+$/g, '')
+        .trim();
+
+    return cleaned;
 }
 
 function sanitizePlainText(text) {
