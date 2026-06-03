@@ -824,9 +824,9 @@ function saveData() {
         grandTotal: document.getElementById('grand-total').innerText,
         status: document.getElementById('status-badge').innerText,
         overall: {
-            summary: document.getElementById('overall-summary').innerHTML,
-            strengths: document.getElementById('overall-strengths').innerHTML,
-            weaknesses: document.getElementById('overall-weaknesses').innerHTML
+            summary: sanitizeCommentHTML(document.getElementById('overall-summary').innerHTML),
+            strengths: sanitizeCommentHTML(document.getElementById('overall-strengths').innerHTML),
+            weaknesses: sanitizeCommentHTML(document.getElementById('overall-weaknesses').innerHTML)
         },
         details: {}
     };
@@ -839,9 +839,9 @@ function saveData() {
             
             payload.details[item.id] = {
                 score: valEl ? (parseInt(valEl.value) || 0) : 0,
-                comment: commEl ? commEl.innerHTML : "", 
+                comment: commEl ? sanitizeCommentHTML(commEl.innerHTML) : "",
                 checks: [],
-                imageUrls: currentNewImages[cleanId] || [] 
+                imageUrls: currentNewImages[cleanId] || []
             };
             
             for(let i=0; i<item.checks.length; i++) {
@@ -1096,15 +1096,85 @@ function exportPDF() {
 
 // ===================================================================
 // YENİ: AKILLI YAPIŞTIRMA FİLTRESİ (SANITIZER)
-// Kopyalanan metinlerin görünmez kodlarını siler, sadece linkleri korur
+// Kopyalanan metinlerin gizli biçimlendirmesini siler, sadece linkleri ve güvenli metni tutar
 // ===================================================================
+
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeCommentHTML(html) {
+    const temp = document.createElement('div');
+    temp.innerHTML = html || '';
+
+    const badTags = new Set(['script', 'style', 'img', 'iframe', 'object', 'embed', 'picture', 'svg', 'canvas', 'table', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'video', 'audio', 'form', 'input', 'button']);
+
+    function sanitizeNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.nodeValue.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return '';
+        }
+
+        const tag = node.tagName.toLowerCase();
+        if (badTags.has(tag)) {
+            return '';
+        }
+
+        if (tag === 'a') {
+            const href = (node.getAttribute('href') || '').trim();
+            const safeHref = href.replace(/[\u0000-\u001F\u007F]+/g, '');
+            if (!/^https?:\/\//i.test(safeHref) && !/^mailto:/i.test(safeHref)) {
+                return sanitizeChildren(node);
+            }
+            const text = sanitizeChildren(node) || escapeHtml(safeHref);
+            return `<a href="${escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
+
+        if (tag === 'br') {
+            return '<br>';
+        }
+
+        if (tag === 'p' || tag === 'div') {
+            const content = sanitizeChildren(node).trim();
+            return content ? `<p>${content}</p>` : '';
+        }
+
+        if (tag === 'b' || tag === 'strong') {
+            return `<strong>${sanitizeChildren(node)}</strong>`;
+        }
+        if (tag === 'i' || tag === 'em') {
+            return `<em>${sanitizeChildren(node)}</em>`;
+        }
+
+        return sanitizeChildren(node);
+    }
+
+    function sanitizeChildren(parent) {
+        return Array.from(parent.childNodes).map(sanitizeNode).join('');
+    }
+
+    return sanitizeChildren(temp).replace(/\s{2,}/g, ' ').trim();
+}
+
+function sanitizePlainText(text) {
+    const escaped = escapeHtml(text || '');
+    return escaped.replace(/\r\n|\r|\n/g, '<br>');
+}
 
 // 1. Tıklama Yakalayıcı (Linkleri yeni sekmede açar)
 document.addEventListener('click', function(e) {
-    const link = e.target.closest('a'); 
+    const link = e.target.closest('a');
     if (link && e.target.closest('.comment-area')) {
-        e.preventDefault(); 
-        window.open(link.href, '_blank'); 
+        e.preventDefault();
+        window.open(link.href, '_blank');
     }
 });
 
@@ -1113,60 +1183,22 @@ document.addEventListener('paste', function(e) {
     const commentArea = e.target.closest('.comment-area');
     if (!commentArea) return;
 
-    // Tarayıcının varsayılan yapıştırma işlemini durdur
     e.preventDefault();
-    
-    // Kopyalanan veriyi HTML formatında almayı dene
-    let pasteHtml = (e.clipboardData || window.clipboardData).getData('text/html');
-    
+    const clipboard = e.clipboardData || window.clipboardData;
+    let pasteHtml = clipboard.getData('text/html');
+    let insertValue = '';
+
     if (pasteHtml) {
-        // Sanal bir kutu oluştur ve kopyalanan HTML'i içine at
-        const temp = document.createElement('div');
-        temp.innerHTML = pasteHtml;
+        insertValue = sanitizeCommentHTML(pasteHtml);
+    }
 
-        // A. Tehlikeli veya çok yer kaplayan tüm etiketleri tamamen sil (resimler, tablolar vs.)
-        const badTags = temp.querySelectorAll('script, style, img, iframe, object, embed, picture, svg, canvas, table, tr, td, th, tbody, thead, tfoot');
-        badTags.forEach(tag => tag.remove());
+    if (!insertValue) {
+        const plainText = clipboard.getData('text/plain') || '';
+        insertValue = sanitizePlainText(plainText);
+    }
 
-        // B. Tüm linkleri (A etiketlerini) bul, temizle ve yeni sekme ayarlarını yap
-        const links = temp.querySelectorAll('a');
-        links.forEach(link => {
-            const href = link.href;
-            const text = link.textContent;
-            
-            // Linkin içindeki spagetti kodları temizle (örneğin eski fontlar)
-            while(link.attributes.length > 0) {
-                link.removeAttribute(link.attributes[0].name);
-            }
-            
-            // Sadece bizim istediğimiz temiz ayarları ekle
-            link.href = href;
-            link.setAttribute('target', '_blank');
-            link.setAttribute('rel', 'noopener noreferrer');
-            link.style.color = '#0284c7';
-            link.style.textDecoration = 'underline';
-            link.style.fontWeight = '600';
-            link.textContent = text; 
-        });
-
-        // C. Metin kutusundaki link HARIÇ diğer tüm etiketlerin (p, div, span vs) gizli CSS stillerini sil
-        const allElements = temp.querySelectorAll('*');
-        allElements.forEach(el => {
-            if (el.tagName !== 'A') { 
-                el.removeAttribute('style');
-                el.removeAttribute('class');
-                el.removeAttribute('id');
-                el.removeAttribute('dir');
-                el.removeAttribute('align');
-            }
-        });
-
-        // Tertemiz ve güvenli hale getirilmiş içeriği editörün içine yapıştır
-        document.execCommand('insertHTML', false, temp.innerHTML);
-    } else {
-        // Eğer kopyalanan şey zaten düz metinse direkt yapıştır
-        let plainText = (e.clipboardData || window.clipboardData).getData('text/plain');
-        document.execCommand('insertText', false, plainText);
+    if (insertValue) {
+        document.execCommand('insertHTML', false, insertValue);
     }
 });
 
