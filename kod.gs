@@ -34,7 +34,7 @@ function compressStringForStorage(text) {
 function decompressStringFromStorage(value) {
   if (typeof value !== 'string' || !value.startsWith('#GZ#')) return value;
   const decodedBytes = Utilities.base64Decode(value.slice(4));
-  const blob = Utilities.newBlob(decodedBytes);
+  const blob = Utilities.newBlob(decodedBytes, 'application/octet-stream');
   const decompressed = Utilities.ungzip(blob);
   return decompressed.getDataAsString();
 }
