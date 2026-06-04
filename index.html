@@ -956,7 +956,7 @@ function saveData() {
                 comment: commEl ? compressIfUseful(sanitizeCommentHTML(commEl.innerHTML)) : "",
                 checks: [],
                 attachments: rawAttachments
-                    .filter(att => att.status === 'done' && att.url)
+                    .filter(att => att.url && (att.status === 'done' || typeof att.status === 'undefined'))
                     .map(att => ({ type: att.type, title: att.title, url: att.url }))
             };
             
@@ -1146,7 +1146,11 @@ function loadProjectData(projNo) {
                     }
 
                     if (det.attachments && det.attachments.length > 0) {
-                        currentAttachments[cleanId] = det.attachments;
+                        currentAttachments[cleanId] = det.attachments.map(att => ({
+                            ...att,
+                            status: att.status || 'done',
+                            src: att.src || att.url || ''
+                        }));
                         renderPreviews(cleanId);
                     }
                 });
