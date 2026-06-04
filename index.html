@@ -946,7 +946,11 @@ function saveData() {
             const commEl = document.getElementById(`comment-${cleanId}`);
             
             const rawAttachments = currentAttachments[cleanId] || [];
-            const pendingAttachment = rawAttachments.find(att => (att.type === 'image' || att.type === 'pdf') && att.status !== 'done');
+            const pendingAttachment = rawAttachments.find(att => {
+                if (att.type !== 'image' && att.type !== 'pdf') return false;
+                const isDone = att.status === 'done' || (typeof att.status === 'undefined' && !!att.url);
+                return !isDone;
+            });
             if (pendingAttachment) {
                 attachmentProblem = `Lütfen tüm dosya yüklemelerinin tamamlanmasını bekleyin. (${item.id} içindeki ${pendingAttachment.title || 'bir ek'})`;
             }
