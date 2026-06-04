@@ -204,6 +204,7 @@ const IMGBB_API_KEY = "cbc42adcd1c112c6d5a9e92eaedc4c56";
 const IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
 
 let currentAttachments = {};
+let activeEvidenceBox = null;
 
 const rubricData = [
     {
@@ -524,7 +525,7 @@ function init() {
                     </div>
                     
                     <div class="evidence-box" id="evidence-box-${cleanId}">
-                        <label id="evidence-label-${cleanId}">Kanıt Dosyası (PDF/Görsel) veya URL Ekle:</label>
+                        <label id="evidence-label-${cleanId}">Kanıt Dosyası (PDF/Görsel) veya URL Ekle — Dosya seçin ya da Ctrl+V ile yapıştırın:</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <input type="text" id="url-input-${cleanId}" placeholder="https://..." style="flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; outline: none;">
                             <button type="button" onclick="addEvidenceLink('${cleanId}')" style="background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">URL Ekle</button>
@@ -1430,15 +1431,65 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         window.open(link.href, '_blank');
     }
+
+    const evidence = e.target.closest('.evidence-box');
+    if (evidence && evidence.id) {
+        activeEvidenceBox = evidence.id.replace(/^evidence-box-/, '');
+    }
 });
 
-// 2. Yapıştırma Yakalayıcı (Metinleri ve linkleri temizler)
+document.addEventListener('focusin', function(e) {
+    const evidence = e.target.closest('.evidence-box');
+    if (evidence && evidence.id) {
+        activeEvidenceBox = evidence.id.replace(/^evidence-box-/, '');
+    }
+});
+
+// 2. Yapıştırma Yakalayıcı (Metinleri, linkleri temizler ve ek dosyayı kanıt alanına ekler)
 document.addEventListener('paste', function(e) {
     const commentArea = e.target.closest('.comment-area');
+    const evidenceBox = e.target.closest('.evidence-box');
+    const clipboard = e.clipboardData || window.clipboardData;
+    const items = Array.from((clipboard && clipboard.items) || []);
+    const fileItem = items.find(item => item.type.startsWith('image/') || item.type === 'application/pdf');
+
+    if (fileItem && (evidenceBox || activeEvidenceBox)) {
+        e.preventDefault();
+        const cleanId = evidenceBox ? evidenceBox.id.replace(/^evidence-box-/, '') : activeEvidenceBox;
+        const file = fileItem.getAsFile();
+        if (file) {
+            if (!currentAttachments[cleanId]) currentAttachments[cleanId] = [];
+            const attachment = {
+                type: file.type.startsWith('image/') ? 'image' : 'pdf',
+                title: file.name || (file.type.startsWith('image/') ? 'clipboard-image.png' : 'clipboard-document.pdf'),
+                src: '',
+                url: null,
+                status: IMGBB_API_KEY && !IMGBB_API_KEY.includes('BURAYA') ? 'uploading' : 'pending'
+            };
+            currentAttachments[cleanId].push(attachment);
+            renderPreviews(cleanId);
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                attachment.src = evt.target.result;
+                renderPreviews(cleanId);
+
+                if (attachment.type === 'image') {
+                    if (IMGBB_API_KEY && !IMGBB_API_KEY.includes('BURAYA')) {
+                        uploadImageToImgbb(attachment, cleanId);
+                    }
+                } else {
+                    uploadFileToDrive(attachment, cleanId, file.type);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        return;
+    }
+
     if (!commentArea) return;
 
     e.preventDefault();
-    const clipboard = e.clipboardData || window.clipboardData;
     let pasteHtml = clipboard.getData('text/html');
     let insertValue = '';
 
