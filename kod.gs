@@ -24,6 +24,35 @@ function createCORSResponse(content) {
   return ContentService.createTextOutput(content);
 }
 
+function handleFileUploadRequest(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return createCORSResponse(JSON.stringify({status: "error", message: "Dosya verisi alınamadı."}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const payload = JSON.parse(e.postData.contents);
+    const fileName = String(payload.fileName || "uploaded-file");
+    const mimeType = String(payload.mimeType || "application/octet-stream");
+    const base64Data = String(payload.data || "");
+
+    if (!base64Data) {
+      return createCORSResponse(JSON.stringify({status: "error", message: "Boş dosya verisi gönderildi."}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, fileName);
+    const file = DriveApp.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    return createCORSResponse(JSON.stringify({status: "success", url: file.getUrl(), title: file.getName()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return createCORSResponse(JSON.stringify({status: "error", message: "Dosya yükleme hatası: " + err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function compressStringForStorage(text) {
   const value = String(text || '');
   if (!value) return value;
@@ -46,6 +75,11 @@ function doPost(e) {
     if (!e || !e.postData || !e.postData.contents) {
       return createCORSResponse(JSON.stringify({status: "error", message: "Veri alınamadı veya boş gönderildi."}))
         .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const action = e.parameter && e.parameter.action;
+    if (action === 'uploadFile') {
+      return handleFileUploadRequest(e);
     }
 
     const data = JSON.parse(e.postData.contents);

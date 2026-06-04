@@ -199,9 +199,11 @@
 // ==========================================
 // KENDİ WEB APP URL'Nİ BURAYA YAPIŞTIR
 // ==========================================
-const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbwaiafs0KmIzf__dVyKhPXl1k1J2wLuPZlrmqdSy76_El4Uiar9oxTKF1p6s4wEZbsUBw/exec"; 
+const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbwaiafs0KmIzf__dVyKhPXl1k1J2wLuPZlrmqdSy76_El4Uiar9oxTKF1p6s4wEZbsUBw/exec";
+const IMGBB_API_KEY = "cbc42adcd1c112c6d5a9e92eaedc4c56";
+const IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
 
-let currentNewImages = {}; 
+let currentAttachments = {};
 
 const rubricData = [
     {
@@ -527,7 +529,7 @@ function init() {
                             <input type="text" id="url-input-${cleanId}" placeholder="https://..." style="flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; outline: none;">
                             <button type="button" onclick="addEvidenceLink('${cleanId}')" style="background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">URL Ekle</button>
                         </div>
-                        <input type="file" multiple accept="image/*,application/pdf" onchange="handleFileUpload(this, '${cleanId}')">
+                        <input type="file" multiple accept="image/png,image/jpeg,application/pdf" onchange="handleFileUpload(this, '${cleanId}')">
                         <div class="preview-container" id="preview-container-${cleanId}"></div>
                     </div>
 
@@ -589,96 +591,194 @@ function init() {
 }
 
 function handleFileUpload(input, cleanId) {
-    if (!currentNewImages[cleanId]) currentNewImages[cleanId] = [];
+    if (!currentAttachments[cleanId]) currentAttachments[cleanId] = [];
 
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            if (file.type.includes('image')) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    canvas.width = width;
-                    canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
-                    currentNewImages[cleanId].push(dataUrl);
-                    renderPreviews(cleanId);
-                }
-                img.src = e.target.result;
-            } else if (file.type.includes('pdf')) {
-                currentNewImages[cleanId].push(e.target.result);
+            if (file.type.startsWith('image/')) {
+                const attachment = {
+                    type: 'image',
+                    title: file.name,
+                    src: e.target.result,
+                    url: null,
+                    status: IMGBB_API_KEY && !IMGBB_API_KEY.includes('BURAYA') ? 'uploading' : 'pending'
+                };
+                currentAttachments[cleanId].push(attachment);
                 renderPreviews(cleanId);
+
+                if (IMGBB_API_KEY && !IMGBB_API_KEY.includes('BURAYA')) {
+                    uploadImageToImgbb(attachment, cleanId);
+                }
+            } else if (file.type === 'application/pdf') {
+                const attachment = {
+                    type: 'pdf',
+                    title: file.name,
+                    src: e.target.result,
+                    url: null,
+                    status: 'uploading'
+                };
+                currentAttachments[cleanId].push(attachment);
+                renderPreviews(cleanId);
+                uploadFileToDrive(attachment, cleanId, file.type);
             }
-        }
+        };
         reader.readAsDataURL(file);
+    });
+}
+
+function uploadImageToImgbb(attachment, cleanId) {
+    const base64 = attachment.src.split(',')[1] || '';
+    const params = new URLSearchParams();
+    params.append('key', IMGBB_API_KEY);
+    params.append('image', base64);
+    params.append('name', attachment.title.replace(/\.[^/.]+$/, ''));
+
+    fetch(IMGBB_UPLOAD_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (data && data.success && data.data && data.data.url) {
+            attachment.url = data.data.url;
+            attachment.status = 'done';
+        } else {
+            attachment.status = 'error';
+            console.error('imgbb upload error', data);
+        }
+        renderPreviews(cleanId);
+    })
+    .catch(err => {
+        attachment.status = 'error';
+        console.error('imgbb upload failed', err);
+        renderPreviews(cleanId);
+    });
+}
+
+function uploadFileToDrive(attachment, cleanId, mimeType) {
+    const base64 = attachment.src.split(',')[1] || '';
+    const fileEntry = {
+        fileName: attachment.title,
+        mimeType: mimeType,
+        data: base64
+    };
+
+    fetch(`${GOOGLE_APP_URL}?action=uploadFile`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(fileEntry)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (data && data.status === 'success' && data.url) {
+            attachment.url = data.url;
+            attachment.status = 'done';
+        } else {
+            attachment.status = 'error';
+            console.error('Drive upload error', data);
+        }
+        renderPreviews(cleanId);
+    })
+    .catch(err => {
+        attachment.status = 'error';
+        console.error('Drive upload failed', err);
+        renderPreviews(cleanId);
     });
 }
 
 function addEvidenceLink(cleanId) {
     const input = document.getElementById(`url-input-${cleanId}`);
     let url = input.value.trim();
-    
     if (!url) return;
-    
+
     if (!/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
     }
 
-    if (!currentNewImages[cleanId]) currentNewImages[cleanId] = [];
-    currentNewImages[cleanId].push(url);
-    input.value = ''; 
+    const title = prompt('Bu bağlantı için bir isim girin:', url) || url;
+    if (!currentAttachments[cleanId]) currentAttachments[cleanId] = [];
+    currentAttachments[cleanId].push({
+        type: 'url',
+        title: title,
+        url: url,
+        src: url,
+        status: 'done'
+    });
+    input.value = '';
     renderPreviews(cleanId);
 }
 
 function renderPreviews(cleanId) {
     const container = document.getElementById(`preview-container-${cleanId}`);
     container.innerHTML = '';
-    
-    if (currentNewImages[cleanId]) {
-        currentNewImages[cleanId].forEach((src, idx) => {
+
+    if (currentAttachments[cleanId]) {
+        currentAttachments[cleanId].forEach((attachment, idx) => {
             const wrap = document.createElement('div');
-            wrap.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; width: 100%; box-sizing: border-box;";
-            
-            let isImage = src.startsWith('data:image') || /\.(jpeg|jpg|gif|png|webp|bmp)(\?.*)?$/i.test(src);
-            let isPdf = src.startsWith('data:application/pdf') || /\.pdf(\?.*)?$/i.test(src);
-            
-            let displayHtml = '';
+            wrap.style.cssText = "display: flex; flex-direction: column; gap: 8px; background: white; border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 0.85rem; width: 100%; box-sizing: border-box;";
+
+            const isImage = attachment.type === 'image';
+            const isPdf = attachment.type === 'pdf';
+
+            const displayUrl = attachment.url || attachment.src;
+            let previewHtml = '';
             if (isImage) {
-                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-                                   <img src="${src}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ccc; cursor:pointer;" onclick="openModal('${src}')" title="Görüntülemek için tıkla">
-                                   <span style="color: var(--accent); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 150px;">Görsel Eklendi</span>
+                previewHtml = `<div style="display:flex; align-items:center; gap:10px;">
+                                   <img src="${displayUrl}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ccc; cursor:pointer;" onclick="openModal('${displayUrl}')" title="Görüntülemek için tıkla">
+                                   <strong style="color: var(--accent);">${escapeHtml(attachment.title || 'Resim')}</strong>
                                </div>`;
             } else if (isPdf) {
-                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                previewHtml = `<div style="display:flex; align-items:center; gap:10px;">
                                    <span style="font-size:24px;">📄</span>
-                                   <a href="${src}" target="_blank" download="kanit_belgesi.pdf" style="color: var(--accent); text-decoration: none; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;" title="PDF İndir/Aç">PDF Belgesi Eklendi</a>
+                                   <a href="${displayUrl}" target="_blank" download="${escapeHtml(attachment.title || 'belge.pdf')}" style="color: var(--accent); text-decoration: none; font-weight: 600;">${escapeHtml(attachment.title || 'PDF Belgesi')}</a>
                                </div>`;
             } else {
-                displayHtml = `<div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                previewHtml = `<div style="display:flex; align-items:center; gap:10px; flex-wrap: wrap;">
                                    <span style="font-size:24px;">🔗</span>
-                                   <a href="${src}" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;" title="${src}">${src}</a>
+                                   <a href="${displayUrl}" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">${escapeHtml(attachment.title || displayUrl)}</a>
                                </div>`;
             }
 
+            const statusText = attachment.status === 'uploading'
+                ? '<span style="color: #2563eb; font-size:0.8rem;">Yükleniyor...</span>'
+                : attachment.status === 'error'
+                ? '<span style="color: #dc2626; font-size:0.8rem;">Yükleme hatası</span>'
+                : '';
+
             wrap.innerHTML = `
-                ${displayHtml}
-                <button type="button" onclick="removeNewImage('${cleanId}', ${idx})" style="background: var(--danger); color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold; font-size: 0.75rem; flex-shrink:0;">SİL</button>
+                <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 0;">${previewHtml}${statusText ? `<div>${statusText}</div>` : ''}</div>
+                    <button type="button" onclick="removeAttachment('${cleanId}', ${idx})" style="background: var(--danger); color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-weight: bold; font-size: 0.75rem;">SİL</button>
+                </div>
+                <input type="text" value="${escapeHtml(attachment.title || '')}" onchange="updateAttachmentTitle('${cleanId}', ${idx}, this.value)" placeholder="Ek adı girin" style="width:100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; outline: none;" />
             `;
+
             container.appendChild(wrap);
         });
     }
 }
 
-function removeNewImage(cleanId, idx) {
-    currentNewImages[cleanId].splice(idx, 1);
+function removeAttachment(cleanId, idx) {
+    currentAttachments[cleanId].splice(idx, 1);
     renderPreviews(cleanId);
+}
+
+function updateAttachmentTitle(cleanId, idx, title) {
+    if (currentAttachments[cleanId] && currentAttachments[cleanId][idx]) {
+        currentAttachments[cleanId][idx].title = title;
+    }
 }
 
 function openModal(src) {
@@ -836,17 +936,27 @@ function saveData() {
         details: {}
     };
 
+    let attachmentProblem = null;
+
     rubricData.forEach((sec) => {
         sec.items.forEach(item => {
             let cleanId = item.id.replace(/\./g, '-');
             const valEl = document.getElementById(`val-${cleanId}`);
             const commEl = document.getElementById(`comment-${cleanId}`);
             
+            const rawAttachments = currentAttachments[cleanId] || [];
+            const pendingAttachment = rawAttachments.find(att => (att.type === 'image' || att.type === 'pdf') && att.status !== 'done');
+            if (pendingAttachment) {
+                attachmentProblem = `Lütfen tüm dosya yüklemelerinin tamamlanmasını bekleyin. (${item.id} içindeki ${pendingAttachment.title || 'bir ek'})`;
+            }
+
             payload.details[item.id] = {
                 score: valEl ? (parseInt(valEl.value) || 0) : 0,
                 comment: commEl ? compressIfUseful(sanitizeCommentHTML(commEl.innerHTML)) : "",
                 checks: [],
-                imageUrls: currentNewImages[cleanId] || []
+                attachments: rawAttachments
+                    .filter(att => att.status === 'done' && att.url)
+                    .map(att => ({ type: att.type, title: att.title, url: att.url }))
             };
             
             for(let i=0; i<item.checks.length; i++) {
@@ -874,10 +984,19 @@ function saveData() {
     Object.keys(payload.details).forEach(id => {
         const entry = payload.details[id];
         checkField(`${id}.comment`, entry.comment);
-        if (entry.imageUrls && Array.isArray(entry.imageUrls)) {
-            entry.imageUrls.forEach((url, idx) => checkField(`${id}.imageUrls[${idx}]`, url));
+        if (entry.attachments && Array.isArray(entry.attachments)) {
+            entry.attachments.forEach((attach, idx) => {
+                checkField(`${id}.attachments[${idx}].title`, attach.title);
+                checkField(`${id}.attachments[${idx}].url`, attach.url);
+            });
         }
     });
+
+    if (attachmentProblem) {
+        document.getElementById('loader').style.display = 'none';
+        alert(`⚠️ Dosya eklerinde sorun var: ${attachmentProblem}`);
+        return;
+    }
 
     if (oversizedFields.length > 0) {
         document.getElementById('loader').style.display = 'none';
@@ -971,7 +1090,7 @@ function handleProjectSelection() {
             if(lbl) { lbl.innerHTML = 'Kanıt Dosyası (PDF/Görsel) veya URL Ekle:'; lbl.style.color = 'var(--primary)'; }
         });
         
-        currentNewImages = {};
+        currentAttachments = {};
         document.querySelectorAll('.preview-container').forEach(c => c.innerHTML = '');
         
         calculateTotal();
@@ -1000,7 +1119,7 @@ function loadProjectData(projNo) {
             document.querySelectorAll('.suggestion-box').forEach(b => { b.classList.remove('active'); b.dataset.suggested = "0"; });
             document.querySelectorAll('.sugg-value').forEach(v => v.innerText = "-");
 
-            currentNewImages = {};
+            currentAttachments = {};
             document.querySelectorAll('.preview-container').forEach(c => c.innerHTML = '');
 
             if(data.details) {
@@ -1025,8 +1144,8 @@ function loadProjectData(projNo) {
                         selectScore(cleanId, det.score);
                     }
 
-                    if (det.imageUrls && det.imageUrls.length > 0) {
-                        currentNewImages[cleanId] = det.imageUrls;
+                    if (det.attachments && det.attachments.length > 0) {
+                        currentAttachments[cleanId] = det.attachments;
                         renderPreviews(cleanId);
                     }
                 });
