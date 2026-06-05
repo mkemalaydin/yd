@@ -75,10 +75,14 @@
         
         .toggle-icon { font-size: 0.8rem; color: #94a3b8; transition: transform 0.3s ease; }
         .collapsed > .section-header .toggle-icon, .collapsed > .sub-title .toggle-icon { transform: rotate(-90deg); }
+        .checklist-container.collapsed .toggle-icon { transform: rotate(-90deg); }
 
         /* Likert Checklist & Dynamic Suggestion */
         .interactive-panel { display: grid; grid-template-columns: 1fr 280px; gap: 20px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .checklist-container h4 { margin: 0 0 15px 0; font-size: 0.9rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+        .checklist-container h4 { margin: 0 0 15px 0; font-size: 0.9rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; padding: 10px; border-radius: 6px; margin-left: -10px; margin-right: -10px; transition: background 0.2s; }
+        .checklist-container h4:hover { background: #f8fafc; }
+        .checklist-container .check-items-list { display: block; }
+        .checklist-container.collapsed .check-items-list { display: none; }
         .check-item { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 10px; padding: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; }
         .check-text { font-size: 0.85rem; color: #334155; line-height: 1.4; flex: 1; }
         .likert-group { display: flex; gap: 4px; }
@@ -778,8 +782,10 @@ function init() {
                     <div class="sub-body">
                         <div class="interactive-panel">
                             <div class="checklist-container">
-                                <h4><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg> Alt Ölçüt Değerlendirme Listesi (1-5 Puan):</h4>
-                                ${checkHtml}
+                                <h4 onclick="this.parentElement.classList.toggle('collapsed')"><span class="toggle-icon">▼</span> <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg> Alt Ölçüt Değerlendirme Listesi (1-5 Puan):</h4>
+                                <div class="check-items-list">
+                                    ${checkHtml}
+                                </div>
                             </div>
                             <div class="suggestion-box" id="sugg-box-${cleanId}">
                                 <div class="sugg-label">Sistem Önerisi</div>
